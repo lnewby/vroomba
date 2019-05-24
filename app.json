@@ -1,0 +1,19 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "description": "",
+  "env": {
+  },
+  "formation": {
+  },
+  "name": "vroomba",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
