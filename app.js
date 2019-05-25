@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(webpackHotMiddleware(compiler))
   app.use(webpackDevMiddleware(compiler, {
     noInfo: true,
-    publicPath: config.output.path
+    publicPath: config[0].output.path
   }))
 }
 
