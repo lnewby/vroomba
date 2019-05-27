@@ -3,10 +3,13 @@
   <head>
     <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
-    <script src="component.min.js"></script>
+    <script src="vroomba.min.js"></script>
   </head>
   <body>
-    <a-scene physics></a-scene>
-    <script src="vroomba.min.js"></script>
+    <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+      <a-camera>
+        <a-cursor id="cursor" color="#fff"></a-cursor>
+      </a-camera>
+    </a-scene>
   </body>
 </html>
