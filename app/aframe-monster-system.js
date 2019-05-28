@@ -140,6 +140,8 @@
 	      var distance = directionVec3.length();
 	      if (distance < bufferZone) { return; }
 
+	      this.el.object3D.lookAt(targetPosition);
+
 	      var factor = this.data.speed / distance;
 	      directionVec3.x *= factor * (timeDelta / 1000);
 	      directionVec3.y *= 0;
