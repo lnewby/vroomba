@@ -4,12 +4,62 @@
     <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
     <script src="vroomba.min.js"></script>
+      <script src="../app/aframe-monster-system.js"></script>
   </head>
   <body>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
-      <a-camera>
-        <a-cursor id="cursor" color="#fff"></a-cursor>
-      </a-camera>
+        <a-entity monster id="monster" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" kinematic-body hit-handler>
+            <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
+         </a-entity>
+
+         <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
     </a-scene>
+
+    <script type="text/javascript">
+
+         // The scene
+         var sceneEl = document.querySelector('a-scene');
+
+
+         // Remove AFrame injected camera
+         var cam = document.querySelector('a-entity[camera][aframe-injected]');
+         sceneEl.removeChild(cam);
+
+
+         // Setup new camera
+         cam = document.createElement('a-entity');
+         cam.setAttribute('camera', '');
+         cam.setAttribute('id', 'playerVision');
+         cam.setAttribute('shooter', '');
+         cam.setAttribute('click-to-shoot', '');
+
+
+         // Setup rig to house camera
+         var rig = document.createElement('a-entity');
+         rig.setAttribute('id', 'player');
+         rig.setAttribute('geometry', {
+            primitive: 'cylinder',
+            radius: '0.2',
+            height: '0.4'
+         });
+         rig.setAttribute('position', {x: 0, y: 0.3, z: 0});
+         rig.setAttribute('wasd-controls', '');
+         rig.setAttribute('look-controls', '');
+         rig.setAttribute('stream-position', '');
+         rig.setAttribute('kinematic-body', '');
+
+
+         // Mouse cursor on camera vision
+         var cursor = document.createElement('a-cursor');
+         cursor.setAttribute('position', {x: 0, y: 0, z: -0.2});
+
+
+         // Add camera to rig to scene
+         cam.appendChild(cursor);
+         rig.appendChild(cam);
+         sceneEl.appendChild(rig);
+
+    </script>
   </body>
 </html>
