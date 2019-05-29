@@ -8,23 +8,13 @@
 		},
 
 		init: function () {
-			this.system.registerMonster(this);
 		},
-
-		onHit: function(damagePoint) {
-			if (this.data.health > 0)
-				this.data.health -= damagePoint;
-		},
-
-		remove: function () {
-		}
 
 	});
 
 
 	AFRAME.registerSystem('monster', {
 		init: function () {
-			this.monsterPrefab;
 		},
 
 		registerMonster: function (e) {
@@ -40,18 +30,56 @@
 				var monster = this.monsterPrefab.cloneNode(true);
 				console.log("Monster: cloned");
 
-				monster.removeAttribute('monster');
-				monster.setAttribute('monster-clone', '');
 				monster.setAttribute('id', 'MM_' + monster.object3D.uuid);
 				monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
 				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.2});
 				monster.setAttribute('visible', true);
 				console.log(monster);
-				this.el.sceneEl.appendChild(monster);
+
+				var healthBar = document.createElement('a-entity');
+				healthBar.setAttribute('text', {
+					value: el.getAttribute('monster').health,
+					width: 0.5,
+					wrapCount: 9,
+					align: 'center',
+					color: 'pink'
+				});
+				healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0})
+
+				monster.appendChild(healthBar);
+				document.querySelector('a-entity[monsters]').appendChild(monster);
 			}
 		},
 
-		unregisterMonster: function () {
+		onHit: function(el, damagePoint) {
+
+			// TO DO if monster doesn't exist
+
+			if ((el != null) && (currentHealth = el.getAttribute('monster').health)) {
+				if (currentHealth > damagePoint) {
+					// If monster still has health, reduce health
+
+					var remainingHealth = currentHealth - damagePoint;
+
+					el.setAttribute('monster', {health: remainingHealth});
+					el.querySelector('a-entity[text]').setAttribute('text', {value: remainingHealth});
+					console.log("Monster: hit " + el.getAttribute('id') + " " + currentHealth + "->" + remainingHealth);
+				} else {
+					// else remove monster
+					el.setAttribute('monster', {health: 0});
+					el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
+					console.log("Monster: died");
+					this.unregisterMonster(el);
+				}
+			}
+
+		},
+
+		unregisterMonster: function (el) {
+			console.log("Monster: remove");
+			document.querySelector('a-entity[monsters]').removeChild(el);
+
+			// TO DO: animate explode
 		}
 
 	});
