@@ -8,6 +8,8 @@
   </head>
   <body>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+
+        <a-entity spawning-zone id="spawning-zone"></a-entity>
         <a-entity monster id="monster" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" hit-handler>
             <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
             <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>

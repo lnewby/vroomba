@@ -1,27 +1,64 @@
 !function (e) {
 
-	AFRAME.registerComponent('monster' , {
+	AFRAME.registerComponent('spawning-zone', {
 
 		schema: {
 			spawnPosition: {type: 'vec3', default: {x: 0, y: 0.0001, z: 0}},
 			spawnRadius: {type: 'number', default: 1},
-			spawnSize: {type: 'number', default: 5},
+			spawnPoolSize: {type: 'number', default: 5},
 			spawnRate: {type: 'number', default: 300}
+		},
+
+		init: function () {
+			this.registerSpawningZone();
+		},
+
+		registerSpawningZone: function() {
+			// Show spawning zone
+			
+			console.log("Spawning zone: creating...");
+
+			this.spawningZone = document.createElement('a-entity');
+			this.spawningZone.setAttribute('geometry', {
+	            primitive: 'circle',
+	            radius: this.data.spawnRadius
+        	});
+        	this.spawningZone.setAttribute('color', 'red');
+			this.spawningZone.setAttribute('position', this.data.spawnPosition);
+			this.spawningZone.setAttribute('rotation', {x: -90, y: 0, z: 0});
+			this.el.sceneEl.appendChild(this.spawningZone);
+
+			console.log("Spawning zone: created at " + JSON.stringify(this.data.spawnPosition));
+		}
+
+	});
+
+
+	AFRAME.registerComponent('monster' , {
+
+		schema: {
+			spawningZone: {type: 'selector', default: '#spawning-zone'},
+			health: {type: 'number', default: 50},
+			hitPoint: {type: 'number', default: 10}
 		},
 
 		init: function () {
 			this.el.visible = false;
 			this.timer = 0;
 			this.system.registerMonster(this);
-			this.system.registerSpawningZone(this);
 		},
 
 		tick: function () {
-			if (this.timer == this.data.spawnRate) {;
+			if (this.timer == this.data.spawningZone.getAttribute('spawning-zone').spawnRate) {
 				this.system.spawn(this);
 				this.timer = 0;
 			}
 			this.timer++;
+		},
+
+		onHit: function() {
+			if (this.data.health > 0)
+				this.data.health -= this.data.hitPoint;
 		},
 
 		remove: function () {
@@ -36,7 +73,6 @@
 			this.monsterPrefab;
 			this.monsters = {}
 			this.monsterCounter = 0;
-			this.spawningZone;
 		},
 
 		registerMonster: function (e) {
@@ -46,19 +82,6 @@
 				this.monsterPrefab.position = this.monsterPrefab.getAttribute('position');
 				console.log(this.monsterPrefab);
 			}
-		},
-
-		registerSpawningZone: function(e) {
-			// Show spawning zone
-			this.spawningZone = document.createElement('a-entity');
-			this.spawningZone.setAttribute('geometry', {
-	            primitive: 'circle',
-	            radius: e.data.spawnRadius
-        	});
-        	this.spawningZone.setAttribute('color', 'red');
-			this.spawningZone.setAttribute('position', e.data.spawnPosition);
-			this.spawningZone.setAttribute('rotation', {x: -90, y: 0, z: 0});
-			this.el.sceneEl.appendChild(this.spawningZone);
 		},
 
 		spawningCoordinates: function(spawnRadius) {
@@ -73,11 +96,11 @@
 
 		spawn: function (e) {
 
-			if (this.monsterCounter < e.data.spawnSize) {
+			if (this.monsterCounter < e.data.spawningZone.getAttribute('spawning-zone').spawnPoolSize) {
 
 				console.group("Monster: spawning monster" + this.monsterCounter );
 
-				this.spawningCoordinates(e.data.spawnRadius);
+				this.spawningCoordinates(e.data.spawningZone.getAttribute('spawning-zone').spawnRadius);
 
 				console.log("Spawn position: {x: " + this.x + ", y:" + this.y + ", z:" + this.z + "}");
 
@@ -116,7 +139,7 @@
 	});
 
 
-   AFRAME.registerComponent('follow', {
+	AFRAME.registerComponent('follow', {
    
 	   schema: {
 	      target: {type: 'selector'},
