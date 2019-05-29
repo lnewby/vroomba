@@ -5,16 +5,33 @@ AFRAME.registerState({
     initialState: gameState(),
 
     handlers: {
-        decreaseScore: function (state, action) {
-            state.score -= action.points;
-            console.log(AFRAME.scenes[0].systems.hudUpdate.updateScore(state.score));
-            console.log("Score decreased");
+        enemyCreated: function(state, action){
+            let enemyId = action.enemyId;
+            state.enemyIds.push(enemyId);
         },
+        enemyHit: function(state, action){
+            let enemyId = action.enemyId;
+            let damage = action.damage;
 
-        increaseScore: function (state, action) {
-            state.score += action.points;
-            console.log(AFRAME.scenes[0].systems.hudUpdate.updateScore(state.score));
-            console.log("Score increased");
+            //testing
+            let randomEnemy = state.enemyIds[Math.floor(Math.random() * (state.enemyIds.length + 1))];
+            let enemyEl = document.querySelector('#' + randomEnemy);
+            if (enemyEl) {
+                AFRAME.scenes[0].systems.monster.onHit(document.querySelector('#' + randomEnemy), damage);
+            } else {
+                console.log("Missed!");
+            }
+        },
+        enemyDefeated: function(state, action){
+            state.enemiesDefeated += 1;
+            if (!(state.currentLevel > state.endLevel)) {
+                state.levelMap[state.currentLevel].enemiesDefeated += 1;
+                let levelObj = state.levelMap[state.currentLevel];
+                if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
+                    state.currentLevel += 1;
+                    AFRAME.scenes[0].systems.hudUpdate.updateLevel(state.currentLevel);
+                }
+            }
         }
     }
 });
@@ -31,12 +48,10 @@ AFRAME.registerComponent('vroomba-scene-setup', {
 
 
         window.onkeyup = function(e) {
-            if (e.key == 1) {
-                sceneEl.emit('increaseScore', {points: 1});
-            } else if (e.key == 2) {
-                sceneEl.emit('decreaseScore', {points: 1});
-            } else if (e.key == 3){
-
+            if (e.key == 1){
+                sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
+            } else if (e.key == 2){
+                sceneEl.emit('enemyDefeated', {});
             }
         };
     }
@@ -44,8 +59,8 @@ AFRAME.registerComponent('vroomba-scene-setup', {
 
 AFRAME.registerSystem('hudUpdate', {
 
-    updateScore: function(score){
-        document.getElementById('score-label').innerHTML = "Score: " + score;
+    updateLevel: function(level){
+        document.getElementById('level-label').innerHTML = "Level " + level;
     }
 
 });
