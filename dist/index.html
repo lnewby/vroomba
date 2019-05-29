@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="lib/aframe.min.js"></script>
-    <script src="lib/aframe-physics-system.min.js"></script>
-    <script src="lib/aframe-state-component.min.js"></script>
-    <script src="vroomba.min.js"></script>
-      <script src="../app/aframe-monster-system.js"></script>
+      <script src="lib/aframe.min.js"></script>
+      <script src="lib/aframe-physics-system.min.js"></script>
+      <script src="lib/aframe-state-component.min.js"></script>
+      <script src="lib/aframe-super-shooter-kit.min.js"></script>
+      <script src="vroomba.min.js"></script>
   </head>
   <body>
+  <div id="score-label" style="position: absolute; height: 50px; top: 20px; left: 20px; z-index: 1; color: yellow; font-size: 50px;">Score: 0</div>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
         <a-entity spawning-zone id="spawning-zone"></a-entity>
