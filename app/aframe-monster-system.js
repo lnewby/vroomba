@@ -3,11 +3,11 @@
 	AFRAME.registerComponent('monster' , {
 
 		schema: {
+			monsterType: {type: 'string'},
 			health: {type: 'number', default: 50}
 		},
 
 		init: function () {
-			this.el.visible = false;
 			this.system.registerMonster(this);
 		},
 
@@ -17,7 +17,6 @@
 		},
 
 		remove: function () {
-			this.system.unregisterMonster(this);
 		}
 
 	});
@@ -29,10 +28,26 @@
 		},
 
 		registerMonster: function (e) {
-			console.log("Monster: cloning");
-			if (this.monsterPrefab = e.el.sceneEl.querySelector('#monster')) {
-				this.monsterPrefab.setAttribute('visible', false);
-				console.log(this.monsterPrefab);
+			e.el.setAttribute('visible', false);
+		},
+
+		createMonster: function	(el, loc) {
+			// Add monster as entity
+		
+			if (this.monsterPrefab = el) {
+				console.log("Monster: prefabed");
+
+				var monster = this.monsterPrefab.cloneNode(true);
+				console.log("Monster: cloned");
+
+				monster.removeAttribute('monster');
+				monster.setAttribute('monster-clone', '');
+				monster.setAttribute('id', 'MM_' + monster.object3D.uuid);
+				monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
+				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.2});
+				monster.setAttribute('visible', true);
+				console.log(monster);
+				this.el.sceneEl.appendChild(monster);
 			}
 		},
 
@@ -57,7 +72,7 @@
 
 		init: function () {
 			this.timer = 0;
-			this.monsterCounter = 1;
+			this.monsterCounter = 0;
 			this.spawnPosition = this.el.object3D.position;
 			this.registerSpawningZone();
 			console.log(this.spawnPosition);
@@ -94,34 +109,23 @@
 			var a = Math.random() * 2 * Math.PI;
 			var r = this.data.spawnRadius * Math.sqrt(Math.random());
 
-			this.x = (r * Math.cos(a)) + this.spawnPosition.x;
-			this.y = this.data.monster.getAttribute('position').y;
-			this.z = (r * Math.sin(a)) + this.spawnPosition.z;
+			this.monsterPosition = new THREE.Vector3((r * Math.cos(a)) + this.spawnPosition.x,
+										this.data.monster.getAttribute('position').y,
+										(r * Math.sin(a)) + this.spawnPosition.z);
+			console.log(this.monsterPosition);
 		},
 
 		spawn: function (e) {
 
-			if (this.monsterCounter <= this.data.spawnPoolSize) {
-
-				console.group("Monster: spawning monster " + this.monsterCounter + "/" + this.data.spawnPoolSize);
-
-				this.spawningCoordinates(this.data.spawnRadius);
-
-				console.log("Spawn position: {x: " + this.x + ", y:" + this.y + ", z:" + this.z + "}");
-
-				// Add monster as entity
-				var monster = this.data.monster.cloneNode(true);
-				monster.removeAttribute('monster');
-				monster.setAttribute('monster-clone', '');
-				monster.setAttribute('id', 'MM_' + monster.object3D.uuid);
-				monster.setAttribute('position', {x: this.x, y: this.y, z: this.z});
-				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.2});
-				monster.setAttribute('visible', true);
-				console.log(monster);
-				this.el.sceneEl.appendChild(monster);
+			if (this.monsterCounter < this.data.spawnPoolSize) {
 
 				this.monsterCounter++;
-			
+				console.group("Monster: spawning monster " + this.data.monster.getAttribute('monster').monsterType + " " + this.monsterCounter + "/" + this.data.spawnPoolSize);
+
+				this.spawningCoordinates(this.data.spawnRadius);
+				e.sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
+
+				console.log("Spawn position: " + JSON.stringify(this.monsterPosition));			
 				console.groupEnd();
 			}
 		}
