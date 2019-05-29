@@ -32,6 +32,13 @@ AFRAME.registerState({
                     AFRAME.scenes[0].systems.hudUpdate.updateLevel(state.currentLevel);
                 }
             }
+        },
+        playerHit: function(state, action){
+            let damage = action.damage;
+            state.playerHealth -= damage;
+            if (state.playerHealth < 0){
+                // TODO: player dead, game over
+            }
         }
     }
 });
@@ -52,6 +59,8 @@ AFRAME.registerComponent('vroomba-scene-setup', {
                 sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
             } else if (e.key == 2){
                 sceneEl.emit('enemyDefeated', {});
+            } else if (e.key == 3){
+                sceneEl.emit('playerHit', {damage: 5});
             }
         };
     }

@@ -1,5 +1,6 @@
 export function gameState() {
     return {
+        playerHealth: 50,
         numEnemiesInLevel: 10,
         totalEnemiesDefeated: 0,
         currentLevel: 1,
