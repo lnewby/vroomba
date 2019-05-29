@@ -11,13 +11,19 @@
   <div id="score-label" style="position: absolute; height: 50px; top: 20px; left: 20px; z-index: 1; color: yellow; font-size: 50px;">Score: 0</div>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-        <a-entity spawning-zone id="spawning-zone"></a-entity>
-        <a-entity monster id="monster" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" hit-handler>
+        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
+        <a-entity monster="monsterType: teal" id="monster1" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" hit-handler>
             <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
             <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
-         </a-entity>
+        </a-entity>
 
-         <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
+        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, 0"></a-entity>
+        <a-entity monster="monsterType: red" id="monster2" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.15 -3" hit-handler>
+            <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
+        </a-entity>
+
+        <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
     </a-scene>
 
     <script type="text/javascript">
