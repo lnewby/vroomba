@@ -4,25 +4,35 @@
       <script src="lib/aframe.min.js"></script>
       <script src="lib/aframe-physics-system.min.js"></script>
       <script src="lib/aframe-state-component.min.js"></script>
-      <script src="lib/aframe-super-shooter-kit.min.js"></script>
       <script src="vroomba.min.js"></script>
+      <script src="lib/aframe-monster-system.js"></script>
+      <script type="text/javascript">
+            
+            AFRAME.registerComponent('monster-hit-handler', {
+                init: function () {
+                    document.body.addEventListener('mousedown', () => {
+                        this.el.sceneEl.systems.monster.onHit(document.querySelector('#target_monster_id'), 10);
+                    });
+                }
+            });
+
+        </script>
   </head>
   <body>
-  <div id="score-label" style="position: absolute; height: 50px; top: 20px; left: 20px; z-index: 1; color: yellow; font-size: 50px;">Score: 0</div>
-    <div id="level-label" style="position: absolute; top: 20px; left: 20px; z-index: 1; color: yellow">Level 1</div>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
         <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
-        <a-entity monster="monsterType: teal" id="monster1" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" hit-handler>
+        <a-entity monster="monsterType: teal" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-hit-handler>
             <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
             <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
         </a-entity>
 
         <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, 0"></a-entity>
-        <a-entity monster="monsterType: red" id="monster2" class="target" target="active: true; healthPoints: 10" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.15 -3" hit-handler>
+        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.15 -3" visible="false" monster-hit-handler>
             <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
             <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
         </a-entity>
+        <a-entity monsters></a-entity>
 
         <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
     </a-scene>
@@ -64,9 +74,25 @@
          // Mouse cursor on camera vision
          var cursor = document.createElement('a-cursor');
          cursor.setAttribute('position', {x: 0, y: 0, z: -0.2});
+         cursor.setAttribute('geometry', {radiusOuter: 0.008, radiusInner: 0.005});
 
+         //Create HUD
+         var gun = document.createElement('a-entity');
+         gun.setAttribute('geometry', {primitive: 'box', height: 0.06, width: 0.035, depth: 0.21});
+         gun.setAttribute('position', {x: -0.05, y: -0.05, z: -0.11});
+         gun.setAttribute('material', {color: 'gray', opacity: 1});
+         gun.setAttribute('rotation', {x: 3.0, y: -10.0, z: -16.0});
+
+         var levelLabel = document.createElement('a-entity');
+         levelLabel.setAttribute('id', 'levelLabel');
+         levelLabel.setAttribute('position', {x:0.004, y:0.033, z:-0.193});
+         levelLabel.setAttribute('rotation', {x:-89.41, y:-20.54, z:109.39});
+         levelLabel.setAttribute('scale', {x:0.5, y:0.5, z:0.5});
+         levelLabel.setAttribute('text', {value: 'Level 1', color: 'black'});
+         gun.appendChild(levelLabel);
 
          // Add camera to rig to scene
+         cam.appendChild(gun);
          cam.appendChild(cursor);
          rig.appendChild(cam);
          sceneEl.appendChild(rig);

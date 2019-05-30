@@ -69,7 +69,7 @@ AFRAME.registerComponent('vroomba-scene-setup', {
 AFRAME.registerSystem('hudUpdate', {
 
     updateLevel: function(level){
-        document.getElementById('level-label').innerHTML = "Level " + level;
+        document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + level});
     }
 
 });
