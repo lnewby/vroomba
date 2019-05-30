@@ -5,6 +5,7 @@
         <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
         <script src="vroomba.min.js"></script>
         <script src="../app/aframe-monster-system.js"></script>
+        <script src="https://unpkg.com/aframe-super-shooter-kit@1.1.7/dist/aframe-super-shooter-kit.min.js"></script>
         <script type="text/javascript">
             
             /*
@@ -17,23 +18,37 @@
             });
             */
 
-            AFRAME.registerComponent('cursor-selector', {
-                init: function () {
-                    this.el.addEventListener('click', (e) => {
-                        var target = e.detail.intersection.object.el;
-                        console.log("Cursor: selected " + target.id);
-                        this.el.sceneEl.systems.monster.onHit(target, 10);
-                    });
-                }
-            });
+            AFRAME.registerComponent('click-to-shoot', {
+      init: function () {
+        document.body.addEventListener('mousedown', () => { this.el.emit('shoot'); });
+      }
+    });
+
+
+    
+           
+            // AFRAME.registerComponent('cursor-selector', {
+            //     init: function () {
+            //         this.el.addEventListener('click', (e) => {
+            //             var target = e.detail.intersection.object.el;
+            //             console.log("Cursor: selected " + target.id);
+            //             // this.el.sceneEl.systems.monster.onHit(target, 10);
+            //             this.el.emit('shoot');
+            //         });
+            //     }
+            // });
+
 
         </script>
   </head>
   <body>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+            <a-entity id="bulletTemplate" bullet geometry="primitive: sphere; radius: 0.1" material="color: orange"></a-entity>
+            <!-- <a-entity id="gun" shooter geometry="primitive: box; width: 0.1; height: 0.1; depth: 0.3" material="color: red" click-to-shoot position="0 0 -1"></a-entity> -->
+
 
         <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
-        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-prefab>
+        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-prefab hit-handle>
             <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
             <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
         </a-entity>
