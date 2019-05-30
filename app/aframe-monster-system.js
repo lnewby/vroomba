@@ -8,7 +8,26 @@
 		},
 
 		init: function () {
-		},
+
+			var healthBar = this.el.querySelector('a-entity[text]');
+
+			console.log("Monster: add health bar to " + this.el.id);
+			if (healthBar) {
+				healthBar.setAttribute('text', {value: this.data.health});
+			} else {
+				healthBar = document.createElement('a-entity');
+				this.el.appendChild(healthBar);
+			}
+
+			healthBar.setAttribute('text', {
+				value: this.data.health,
+				width: 0.5,
+				wrapCount: 9,
+				align: 'center',
+				color: 'pink'
+			});
+			healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0});
+		}
 
 	});
 
@@ -18,7 +37,6 @@
 		},
 
 		registerMonster: function (e) {
-			e.el.setAttribute('visible', false);
 		},
 
 		createMonster: function	(el, loc) {
@@ -36,17 +54,6 @@
 				monster.setAttribute('visible', true);
 				console.log(monster);
 
-				var healthBar = document.createElement('a-entity');
-				healthBar.setAttribute('text', {
-					value: el.getAttribute('monster').health,
-					width: 0.5,
-					wrapCount: 9,
-					align: 'center',
-					color: 'pink'
-				});
-				healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0})
-
-				monster.appendChild(healthBar);
 				document.querySelector('a-entity[monsters]').appendChild(monster);
 			}
 		},
@@ -55,7 +62,7 @@
 
 			// TO DO if monster doesn't exist
 
-			if ((el != null) && (currentHealth = el.getAttribute('monster').health)) {
+			if ((el != null) && (el.getAttribute('monster')) && (currentHealth = el.getAttribute('monster').health)) {
 				if (currentHealth > damagePoint) {
 					// If monster still has health, reduce health
 
@@ -63,7 +70,7 @@
 
 					el.setAttribute('monster', {health: remainingHealth});
 					el.querySelector('a-entity[text]').setAttribute('text', {value: remainingHealth});
-					console.log("Monster: hit " + el.getAttribute('id') + " " + currentHealth + "->" + remainingHealth);
+					console.log("Monster: hit " + el.id + " " + currentHealth + "->" + remainingHealth);
 				} else {
 					// else remove monster
 					el.setAttribute('monster', {health: 0});
