@@ -27,6 +27,35 @@
                 }
             });
 
+            AFRAME.registerComponent('player', {
+                schema: {
+                    a: {type: 'number', default: 0},
+                    r: {type: 'number', default: 0},
+                    //path: {type: 'array'},
+                    speed: {type: 'number', default: 0.002}
+                },
+
+                init: function () {
+                    // Generate path
+                    this.data.r = 2;
+                },
+
+                tick: function () {
+                    //this.el.setAttribute('position', this.data.path[this.data.currentPosIndex]);
+                    r = this.data.r;
+                    a = this.data.a;
+
+                    this.el.setAttribute('position', new THREE.Vector3((r * Math.cos(a)) + r, 0.3, (r * Math.sin(a)) + r));
+                    //console.log(a + ": " + JSON.stringify(this.el.getAttribute('position')));
+
+                    if (a < Math.PI * 2) {
+                        this.data.a += this.data.speed;
+                    } else {
+                        this.data.a = 0;
+                    }
+                }
+            });
+
         </script>
   </head>
   <body>
@@ -69,6 +98,7 @@
 
          // Setup rig to house camera
          var rig = document.createElement('a-entity');
+         rig.setAttribute('player', '');
          rig.setAttribute('id', 'player');
          rig.setAttribute('geometry', {
             primitive: 'cylinder',

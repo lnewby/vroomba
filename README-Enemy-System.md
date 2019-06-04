@@ -31,7 +31,7 @@ schema: {
 ```
 Use *onHit* function to reduce monster health points
 ```
-this.el.sceneEl.systems.monster.onHit(<'selector'>, <number>);
+this.el.sceneEl.systems.monster.onHit(<'selector'>, <damagePoint: number>);
 ```
 To test the health system, use the script below to deduct damage points from the cursor selected target.
 ```
@@ -60,15 +60,15 @@ schema: {
 ```
 <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, 0"></a-entity>
 ```
-# Following Target Component
+## Following Target Component
 ```
 schema: {
     target: {type: 'selector'},
     speed: {type: 'number'},
     space: {type: 'number', default: 0.5}
-},
+}
 ```
-Use .setAttribute or set under HTML tag
+Use *.setAttribute* or set under *<a-entity>* tag
 ```
 monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.2});
 ```
