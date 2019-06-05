@@ -1,16 +1,128 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="lib/aframe.min.js"></script>
-    <script src="lib/aframe-physics-system.min.js"></script>
-    <script src="lib/aframe-state-component.min.js"></script>
-    <script src="vroomba.min.js"></script>
+        <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
+        <script src="vroomba.min.js"></script>
+        <script src="../app/aframe-monster-system.js"></script>
+        <script type="text/javascript">
+            
+            /*
+            AFRAME.registerComponent('monster-hit-handler', {
+                init: function () {
+                    document.body.addEventListener('mousedown', () => {
+                        this.el.sceneEl.systems.monster.onHit(document.querySelector('#target_monster_id'), 10);
+                    });
+                }
+            });
+            */
+
+            AFRAME.registerComponent('cursor-selector', {
+                init: function () {
+                    this.el.addEventListener('click', (e) => {
+                        var target = e.detail.intersection.object.el;
+                        console.log("Cursor: selected " + target.id);
+                        this.el.sceneEl.systems.monster.onHit(target, 10);
+                    });
+                }
+            });
+
+            AFRAME.registerComponent('player', {
+                schema: {
+                    a: {type: 'number', default: 0},
+                    r: {type: 'number', default: 0},
+                    //path: {type: 'array'},
+                    speed: {type: 'number', default: 0.002}
+                },
+
+                init: function () {
+                    // Generate path
+                    this.data.r = 2;
+                },
+
+                tick: function () {
+                    //this.el.setAttribute('position', this.data.path[this.data.currentPosIndex]);
+                    r = this.data.r;
+                    a = this.data.a;
+
+                    this.el.setAttribute('position', new THREE.Vector3((r * Math.cos(a)) + r, 0.3, (r * Math.sin(a)) + r));
+                    //console.log(a + ": " + JSON.stringify(this.el.getAttribute('position')));
+
+                    if (a < Math.PI * 2) {
+                        this.data.a += this.data.speed;
+                    } else {
+                        this.data.a = 0;
+                    }
+                }
+            });
+
+        </script>
   </head>
   <body>
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
-      <a-camera>
-        <a-cursor id="cursor" color="#fff"></a-cursor>
-      </a-camera>
+
+        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
+        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
+        </a-entity>
+
+        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, 0"></a-entity>
+        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.15 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
+        </a-entity>
+        <a-entity monsters></a-entity>
+
+        <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
     </a-scene>
+
+    <script type="text/javascript">
+
+         // The scene
+         var sceneEl = document.querySelector('a-scene');
+
+
+         // Remove AFrame injected camera
+         var cam = document.querySelector('a-entity[camera][aframe-injected]');
+         sceneEl.removeChild(cam);
+
+
+         // Setup new camera
+         cam = document.createElement('a-entity');
+         cam.setAttribute('camera', '');
+         cam.setAttribute('id', 'playerVision');
+         cam.setAttribute('shooter', '');
+         cam.setAttribute('click-to-shoot', '');
+
+
+         // Setup rig to house camera
+         var rig = document.createElement('a-entity');
+         rig.setAttribute('player', '');
+         rig.setAttribute('id', 'player');
+         rig.setAttribute('geometry', {
+            primitive: 'cylinder',
+            radius: '0.2',
+            height: '0.4'
+         });
+         rig.setAttribute('position', {x: 0, y: 0.3, z: 0});
+         rig.setAttribute('wasd-controls', '');
+         rig.setAttribute('look-controls', '');
+         rig.setAttribute('stream-position', '');
+         rig.setAttribute('kinematic-body', '');
+
+
+         // Mouse cursor on camera vision
+         var cursor = document.createElement('a-cursor');
+         cursor.setAttribute('position', {x: 0, y: 0, z: -0.2});
+         cursor.setAttribute('cursor-selector', '');
+
+
+         // Add camera to rig to scene
+         cam.appendChild(cursor);
+         rig.appendChild(cam);
+         sceneEl.appendChild(rig);
+
+    </script>
   </body>
 </html>
