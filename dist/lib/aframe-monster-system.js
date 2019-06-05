@@ -55,6 +55,7 @@
 				console.log(monster);
 
 				document.querySelector('a-entity[monsters]').appendChild(monster);
+				this.el.sceneEl.emit('enemyCreated', {enemyId: 'MM_' + monster.object3D.uuid});
 			}
 		},
 
@@ -77,6 +78,7 @@
 					el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
 					console.log("Monster: died");
 					this.unregisterMonster(el);
+					this.el.sceneEl.emit('enemyDefeated');
 				}
 			}
 
