@@ -6,6 +6,7 @@
         <script src="lib/aframe-state-component.min.js"></script>
         <script src="lib/aframe-monster-system.js"></script>
         <script src="vroomba.min.js"></script>
+        <script src="lib/main.js"></script>
         <script type="text/javascript">
             
             /*
@@ -60,7 +61,15 @@
         </script>
   </head>
   <body>
+    <img src="http://10.25.172.117:8080/stream" id="videoStream" />
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+            <a-assets>
+                    <canvas id="helloWorldCanvas" crossOrigin="anonymous"></canvas>
+                  </a-assets>
+        <a-entity id="streamPlane" material="shader: flat; src: #helloWorldCanvas"
+            geometry="primitive: plane; width: 640; height: 360"
+            position="0 0 -250"
+            draw-canvas-rectangles="#helloWorldCanvas"></a-entity>
 
         <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
         <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-prefab>
