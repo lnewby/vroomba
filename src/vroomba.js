@@ -38,6 +38,7 @@ AFRAME.registerState({
             state.playerHealth -= damage;
             if (state.playerHealth < 0){
                 // TODO: player dead, game over
+                AFRAME.scenes[0].systems.hudUpdate.gameOver();
             }
         }
     }
@@ -70,6 +71,10 @@ AFRAME.registerSystem('hudUpdate', {
 
     updateLevel: function(level){
         document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + level});
+    },
+
+    gameOver: function(){
+        document.querySelector('#levelLabel').setAttribute('text', {value: "Game Over!"});
     }
 
 });
