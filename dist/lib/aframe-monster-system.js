@@ -41,7 +41,7 @@
 
 		createMonster: function	(el, loc) {
 			// Add monster as entity
-		
+
 			if (this.monsterPrefab = el) {
 				console.log("Monster: prefabed");
 
@@ -117,7 +117,7 @@
 
 		registerSpawningZone: function() {
 			// Show spawning zone
-			
+
 			console.log("Spawning zone: " + this.el.id + " creating...");
 
 			this.spawningZone = document.createElement('a-entity');
@@ -162,7 +162,7 @@
 				this.spawningCoordinates(this.data.spawnRadius);
 				e.sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
 
-				console.log("Spawn position: " + JSON.stringify(this.monsterPosition));			
+				console.log("Spawn position: " + JSON.stringify(this.monsterPosition));
 				console.groupEnd();
 			}
 		}
@@ -171,7 +171,7 @@
 
 
 	AFRAME.registerComponent('follow', {
-   
+
 	   schema: {
 	      target: {type: 'selector'},
 	      speed: {type: 'number'},
@@ -181,14 +181,18 @@
 	   init: function () {
 	      this.directionVec3 = new THREE.Vector3();
 	   },
-	   
+
 	   tick: function (time, timeDelta) {
 	      var directionVec3 = this.directionVec3;
 
 	      var bufferZone = this.data.space + this.el.getAttribute('geometry').radius;
 	      var targetPosition = this.data.target.object3D.position;
 	      var currentPosition = this.el.object3D.position;
-	      
+
+				currentPosition.x += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+				currentPosition.y += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+				currentPosition.z += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+
 	      directionVec3.copy(targetPosition).sub(currentPosition);
 
 	      var distance = directionVec3.length();
@@ -198,7 +202,7 @@
 
 	      var factor = this.data.speed / distance;
 	      directionVec3.x *= factor * (timeDelta / 1000);
-	      directionVec3.y *= 0;
+	      directionVec3.y *= factor * (timeDelta / 1000);
 	      directionVec3.z *= factor * (timeDelta / 1000);
 
 	      this.el.setAttribute('position', {
@@ -211,7 +215,3 @@
 	});
 
 }()
-
-
-
-
