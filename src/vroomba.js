@@ -144,6 +144,7 @@ AFRAME.registerSystem('weapon', {
                 let enemy = nearbyEnemies[i];
                 this.el.sceneEl.systems.monster.onHit(enemy, this.data.damage/2);
             }
+            this.el.sceneEl.systems.monster.onHit(target, this.data.damage);
         } else if (this.data.effect == "sniper"){
             let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 1);
             console.log(nearbyEnemies);
@@ -214,10 +215,12 @@ AFRAME.registerSystem('weapon', {
                 continue;
             }
             var el = document.querySelector('#' + id);
+            if (el == null){
+                continue;
+            }
             var elPosition = el.getAttribute('position');
             if (el != null && targetPosition != null && elPosition != null) {
-                let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x))
-                    + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
+                let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x)) + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
                 console.log("distance " + d2target);
                 if (Math.abs(d2target) <= distance) {
                     nearbyMonsters.push(el);
