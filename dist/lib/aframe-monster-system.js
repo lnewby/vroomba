@@ -43,16 +43,16 @@
 			// Add monster as entity
 		
 			if (this.monsterPrefab = el) {
-				console.log("Monster: prefabed");
 
 				var monster = this.monsterPrefab.cloneNode(true);
-				console.log("Monster: cloned");
+				//console.log("Monster: cloned");
 
-				monster.setAttribute('id', 'MM_' + monster.object3D.uuid);
+				var monster_id = 'MM_' + monster.object3D.uuid;
+				monster.setAttribute('id', monster_id);
 				monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
 				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.5});
 				monster.setAttribute('visible', true);
-				console.log(monster);
+				console.log('Monster ID: MM_' + monster_id);
 
 				document.querySelector('a-entity[monsters]').appendChild(monster);
 				this.el.sceneEl.emit('enemyCreated', {enemyId: 'MM_' + monster.object3D.uuid});
@@ -149,7 +149,7 @@
 			this.monsterPosition = new THREE.Vector3((r * Math.cos(a)) + this.spawnPosition.x,
 										this.data.monster.getAttribute('position').y,
 										(r * Math.sin(a)) + this.spawnPosition.z);
-			console.log(this.monsterPosition);
+			//console.log(this.monsterPosition);
 		},
 
 		spawn: function (e) {

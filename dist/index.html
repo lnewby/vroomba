@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
   <head>
+        <meta charset="utf-8">
+        <title>Vroomba</title>
         <script src="lib/aframe.min.js"></script>
         <!-- <script src="lib/aframe-physics-system.min.js"></script> -->
         <script src="lib/aframe-state-component.min.js"></script>
         <script src="lib/aframe-monster-system.js"></script>
         <script src="vroomba.min.js"></script>
-        <script src="lib/main.js"></script>
-        <script src="lib/socket.io.js"></script>
+        <!--<script src="lib/main.js"></script>-->
+        <script src="./socket.io/socket.io.js"></script>
 
         <script type="text/javascript">
-            var socket = io.connect('http://10.26.142.233:3000');
+
             var position = null;
             var imageStream = null;
             var bufferSize = 15;
             var bufferPt = 0;
             var imageArray = [];
 
+            //var socket = io.connect('http://10.26.142.233:3000');
+            var socket = io.connect('http://10.183.15.70.:3000');
+
             socket.on('position', function (data) {
                 //console.log(data);
                 position = data;
             });
-/*
+
             socket.on('camera', function (data) {
                 //console.log(data);
                 imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
                 if (bufferPt++ > bufferSize) { bufferPt = 0; }
-
-                //imageStream = "data:image/jpeg;base64," + JSON.parse(data).img;
             });
-*/
+
         </script>
         <script type="text/javascript">
 
@@ -60,9 +63,10 @@
                     
                     var setPos = position === undefined ? null : JSON.parse(position);
                     if (setPos != null) {
+                        var offset = 1.6;
                         this.el.setAttribute('position', {x: setPos.x, y: 0.2, z: setPos.z});
-                        this.playerbody.setAttribute('position', {x: setPos.x, y: 1.6, z: setPos.z});
-                        this.cam.setAttribute('position', {x: setPos.x, y: -1.6, z: setPos.z})
+                        this.playerbody.setAttribute('position', {x: setPos.x, y: offset, z: setPos.z});
+                        this.cam.setAttribute('position', {x: setPos.x, y: -offset, z: setPos.z})
                         //console.log(setPos);
                     }
 
@@ -72,16 +76,29 @@
 
                 }
             });
-/*
+
+            AFRAME.registerComponent('shoot-controls', {
+                init: function () {
+                    console.log("Vive: config");
+                    this.el.addEventListener('triggerdown', () => {
+                        var cursor = document.querySelector('a-cursor');
+                        var target = cursor.detail.intersection.object.el;
+                        console.log("Vive: selected " + target.id);
+                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                    });
+                }
+            });
+
             AFRAME.registerComponent('backdrop', {
                 tick: function () {
                     this.el.setAttribute('src', imageArray[bufferPt]);
                 }
             });
-*/
+
         </script>
   </head>
   <body>
+
 
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
@@ -98,7 +115,7 @@
         </a-entity>
         <a-entity monsters></a-entity>
 
-        <a-entity vive-controls="hand: right"></a-entity>
+        <a-entity shoot-controls vive-controls="hand: right"></a-entity>
 
         <a-entity vehicle position="0 0.2 0">
             <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
@@ -108,8 +125,8 @@
             </a-entity>
             
             <a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
-            <a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 0 0"></a-entity>
-            <a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 0 0"></a-entity>
+            <a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 1.6 0"></a-entity>
+            <a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 1.6 0"></a-entity>
         </a-entity>
 
         <a-plane position="0 1.6 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
