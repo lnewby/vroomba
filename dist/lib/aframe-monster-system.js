@@ -50,7 +50,7 @@
 
 				monster.setAttribute('id', 'MM_' + monster.object3D.uuid);
 				monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
-				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.2});
+				monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.5});
 				monster.setAttribute('visible', true);
 				console.log(monster);
 
@@ -175,7 +175,7 @@
 	   schema: {
 	      target: {type: 'selector'},
 	      speed: {type: 'number'},
-	      space: {type: 'number', default: 0.5}
+	      space: {type: 'number', default: 0.5},
 	   },
 
 	   init: function () {
@@ -185,10 +185,11 @@
 	   tick: function (time, timeDelta) {
 	      var directionVec3 = this.directionVec3;
 
-	      var bufferZone = this.data.space + this.el.getAttribute('geometry').radius;
+	      var bufferZone = this.data.space;
 	      var targetPosition = this.data.target.object3D.position;
-	      var currentPosition = this.el.object3D.position;
-	      
+	      //var currentPosition = this.el.object3D.position;
+	      var currentPosition = this.el.getAttribute('position');
+
 	      directionVec3.copy(targetPosition).sub(currentPosition);
 
 	      var distance = directionVec3.length();
