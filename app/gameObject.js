@@ -1,3 +1,4 @@
+/*
 export function sphere() {
     const el = document.createElement('a-sphere');
     el.setAttribute('dynamic-body', {
@@ -26,6 +27,7 @@ export function box() {
     el.object3D.rotation.y = THREE.Math.degToRad(45);
     return el;
 }
+*/
 
 export function groundPlane() {
     const el = document.createElement('a-plane');

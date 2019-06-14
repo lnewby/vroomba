@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html>
   <head>
+        <meta charset="utf-8">
+        <title>Vroomba</title>
         <script src="lib/aframe-v0.9.2.min.js"></script>
         <!-- <script src="lib/aframe-physics-system.min.js"></script> -->
         <script src="lib/aframe-state-component.min.js"></script>
         <script src="lib/aframe-monster-system.js"></script>
         <script src="vroomba.min.js"></script>
-        <script src="lib/main.js"></script>
+        <!--<script src="lib/main.js"></script>-->
+        <script src="./socket.io/socket.io.js"></script>
+
         <script type="text/javascript">
-            /*
-            AFRAME.registerComponent('monster-hit-handler', {
-                init: function () {
-                    document.body.addEventListener('mousedown', () => {
-                        this.el.sceneEl.systems.monster.onHit(document.querySelector('#target_monster_id'), 10);
-                    });
-                }
+
+            var position = null;
+            var imageStream = null;
+            var bufferSize = 15;
+            var bufferPt = 0;
+            var imageArray = [];
+
+            //var socket = io.connect('http://10.26.142.233:3000');
+            var socket = io.connect('http://10.183.15.70.:3000');
+
+            socket.on('position', function (data) {
+                //console.log(data);
+                position = data;
             });
-            */
+
+            socket.on('camera', function (data) {
+                //console.log(data);
+                imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
+                if (bufferPt++ > bufferSize) { bufferPt = 0; }
+            });
+
+        </script>
+        <script type="text/javascript">
 
             AFRAME.registerComponent('cursor-selector', {
                 init: function () {
@@ -28,112 +46,105 @@
                 }
             });
 
-            AFRAME.registerComponent('player', {
-                schema: {
-                    a: {type: 'number', default: 0},
-                    r: {type: 'number', default: 0},
-                    //path: {type: 'array'},
-                    speed: {type: 'number', default: 0.002}
-                },
-
-                init: function () {
-                    // Generate path
-                    this.data.r = 2;
-                },
-
-                tick: function () {
-                    //this.el.setAttribute('position', this.data.path[this.data.currentPosIndex]);
-                    r = this.data.r;
-                    a = this.data.a;
-
-                    this.el.setAttribute('position', new THREE.Vector3((r * Math.cos(a)) + r, 0.3, (r * Math.sin(a)) + r));
-                    //console.log(a + ": " + JSON.stringify(this.el.getAttribute('position')));
-
-                    if (a < Math.PI * 2) {
-                        this.data.a += this.data.speed;
-                    } else {
-                        this.data.a = 0;
-                    }
-                }
-            });
-
             AFRAME.registerComponent('vehicle', {
                 schema: {
-                    a: {type: 'number', default: 0},
-                    r: {type: 'number', default: 0},
+                    isVisiblePos: {type: 'boolean', default: true},
                     speed: {type: 'number', default: 0.002}
                 },
 
                 init: function () {
-                    this.data.r = 2;
+                    this.cam = document.querySelector('a-entity[camera]');
+                    this.playerbody = document.querySelector('#player');
+                    this.playerDebug = document.querySelector('#player-debug');
+                    this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
                 },
 
                 tick: function () {
-                    r = this.data.r;
-                    a = this.data.a;
-
-                    this.el.setAttribute('position', new THREE.Vector3((r * Math.cos(a)) + r, 0.3, (r * Math.sin(a)) + r));
-
-                    if (a < Math.PI * 2) {
-                        this.data.a += this.data.speed;
-                    } else {
-                        this.data.a = 0;
+                    
+                    var setPos = position === undefined ? null : JSON.parse(position);
+                    if (setPos != null) {
+                        var offset = 1.6;
+                        this.el.setAttribute('position', {x: setPos.x, y: 0.2, z: setPos.z});
+                        this.playerbody.setAttribute('position', {x: setPos.x, y: offset, z: setPos.z});
+                        this.cam.setAttribute('position', {x: setPos.x, y: -offset, z: setPos.z})
+                        //console.log(setPos);
                     }
+
+                    if (this.data.isVisiblePos) {
+                        this.playerDebug.setAttribute('text', {value: JSON.stringify(this.playerbody.getAttribute('position'))});
+                    }
+
                 }
             });
 
+            AFRAME.registerComponent('shoot-controls', {
+                init: function () {
+                    console.log("Vive: config");
+                    this.el.addEventListener('triggerdown', () => {
+                        var cursor = document.querySelector('a-cursor');
+                        var target = cursor.detail.intersection.object.el;
+                        console.log("Vive: selected " + target.id);
+                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                    });
+                }
+            });
+
+            AFRAME.registerComponent('backdrop', {
+                tick: function () {
+                    this.el.setAttribute('src', imageArray[bufferPt]);
+                }
+            });
 
         </script>
   </head>
   <body>
-    <img src="http://10.25.172.117:8080/stream" id="videoStream" />
-    <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
-            <a-assets>
-                    <canvas id="helloWorldCanvas" crossOrigin="anonymous"></canvas>
-                  </a-assets>
-        <a-entity id="streamPlane" material="shader: flat; src: #helloWorldCanvas"
-            geometry="primitive: plane; width: 640; height: 360"
-            position="0 0 -250"
-            draw-canvas-rectangles="#helloWorldCanvas"></a-entity>
 
-        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, 0"></a-entity>
-        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.2 -3" visible="false" monster-prefab>
-            <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
-            <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
+
+    <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+
+        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 1.6001, 0"></a-entity>
+        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 1.8 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.111 0.139 0" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.111 0.139 0" kinematic-body></a-sphere>
         </a-entity>
 
-        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, 0"></a-entity>
-        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.15 -3" visible="false" monster-prefab>
-            <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
-            <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
+        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 1.6001, 0"></a-entity>
+        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 1.75 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.061 0.089 0" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.061 0.089 0" kinematic-body></a-sphere>
         </a-entity>
         <a-entity monsters></a-entity>
 
-        <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
+        <a-entity shoot-controls vive-controls="hand: right"></a-entity>
+
+        <a-entity vehicle position="0 0.2 0">
+            <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
+            <a-entity camera="active: true" id="playerVision" position="0 -1.6 0" look-controls>
+                <a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
+                <a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
+            </a-entity>
+            
+            <a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
+            <a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 1.6 0"></a-entity>
+            <a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 1.6 0"></a-entity>
+        </a-entity>
+
+        <a-plane position="0 1.6 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+
     </a-scene>
 
     <script type="text/javascript">
 
          // The scene
-         var sceneEl = document.querySelector('a-scene');
+         let sceneEl = document.querySelector('a-scene');
+         let cam = document.querySelector('a-entity[camera]');
+         let vehicle = document.querySelector('a-entity[vehicle]');
+         let leftWall = document.querySelector('#left-wall');
+         let rightWall = document.querySelector('#right-wall');
 
-
-         // Remove AFrame injected camera
-         var cam = document.querySelector('a-entity[camera][aframe-injected]');
-         sceneEl.removeChild(cam);
-
-
-         // Setup new camera
-         cam = document.createElement('a-entity');
-         cam.setAttribute('camera', '');
-         cam.setAttribute('id', 'playerVision');
-         cam.setAttribute('shooter', '');
-         cam.setAttribute('click-to-shoot', '');
 
          //setup vehicle
-         let vehicle = document.createElement('a-entity');
-         vehicle.setAttribute('vehicle', '');
-         vehicle.setAttribute('id', 'vehicle');
+         /*
          let rightWall = document.createElement('a-entity');
          rightWall.setAttribute('geometry', {primitive: 'box', height: 0.5, width: 0.1});
          rightWall.setAttribute('rotation', {x: 0.0, y: 27.5, z: 0.0});
@@ -144,6 +155,7 @@
          leftWall.setAttribute('rotation', {x: 0.0, y: 151.0, z: 0.0});
          leftWall.setAttribute('position', {x: -0.8, y: 0.0, z: 0.0});
          leftWall.setAttribute('material', {color: 'darkgrey', opacity: 1});
+         */
          let pullButton = document.createElement('a-entity');
          pullButton.setAttribute('id', 'pull');
          pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
@@ -168,27 +180,9 @@
          leftWall.appendChild(pushButton);
          rightWall.appendChild(areaButton);
          rightWall.appendChild(sniperButton);
-         vehicle.appendChild(leftWall);
-         vehicle.appendChild(rightWall);
-
-         // Setup rig to house camera
-         var player = document.createElement('a-entity');
-         player.setAttribute('player', '');
-         player.setAttribute('id', 'player');
-         player.setAttribute('geometry', {primitive: 'cylinder', radius: '0.2', height: '0.4'});
-         player.setAttribute('position', {x: 0, y: 0.3, z: 0});
-         player.setAttribute('wasd-controls', '');
-         player.setAttribute('look-controls', '');
-         player.setAttribute('stream-position', '');
-         player.setAttribute('kinematic-body', '');
 
 
-         // Mouse cursor on camera vision
-         var cursor = document.createElement('a-cursor');
-         cursor.setAttribute('position', {x: 0, y: 0, z: -0.2});
-         cursor.setAttribute('cursor-selector', '');
-
-                  //Create HUD
+         //Create HUD
          var gun = document.createElement('a-entity');
          gun.setAttribute('id', 'weapon');
          gun.setAttribute('geometry', {primitive: 'box', height: 0.06, width: 0.035, depth: 0.21});
@@ -202,12 +196,10 @@
          levelLabel.setAttribute('scale', {x:0.5, y:0.5, z:0.5});
          levelLabel.setAttribute('text', {value: 'Level 1', color: 'white'});
          gun.appendChild(levelLabel);
+
+
          // Add camera to rig to scene
          cam.appendChild(gun);
-         cam.appendChild(cursor);
-         player.appendChild(cam);
-         sceneEl.appendChild(vehicle);
-         sceneEl.appendChild(player);
     </script>
   </body>
 </html>
