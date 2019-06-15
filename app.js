@@ -14,6 +14,9 @@ if (process.env.NODE_ENV !== 'production') {
     noInfo: true,
     publicPath: config[0].output.path
   }))
+  app.use(function(req, res, next){
+    res.header("Access-Control-Allow-Origin", "*");
+  })
 }
 
 var server1 = app.listen(port)
@@ -21,7 +24,7 @@ console.log(`Listening at http://localhost:${port}`)
 
 const socket = require('socket.io');
 var io = socket(server1);
-
+io.origins('*:*');
 io.on('connection', function(socket) {
   console.log('a user connected');
   socket.on('position', function(data) {
