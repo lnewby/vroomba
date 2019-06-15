@@ -3,12 +3,12 @@
   <head>
         <meta charset="utf-8">
         <title>Vroomba</title>
-        <script src="lib/aframe.min.js"></script>
+        <script src="lib/aframe-v0.9.2.min.js"></script>
         <!-- <script src="lib/aframe-physics-system.min.js"></script> -->
         <script src="lib/aframe-state-component.min.js"></script>
         <script src="lib/aframe-monster-system.js"></script>
-        <!--<script src="vroomba.min.js"></script>-->
-        <!--<script src="lib/main.js"></script>-->
+        <script src="vroomba.min.js"></script>
+        <!-- <script src="lib/main.js"></script> -->
         <script src="./socket.io/socket.io.js"></script>
 
         <script type="text/javascript">
@@ -18,7 +18,7 @@
             var bufferSize = 15;
             var bufferPt = 0;
             var imageArray = [];
-            var socket = io.connect('http://10.183.15.70.:3000');
+            var socket = io.connect('https://vroomba-app.herokuapp.com:3000');
 
             socket.on('position', function (data) {
                 //console.log(data);

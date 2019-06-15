@@ -1,5 +1,5 @@
 import {gameState} from '../app/gameState.js'
-import {sky, groundPlane, box, sphere} from '../app/gameObject.js';
+import {sky, groundPlane} from '../app/gameObject.js';
 
 AFRAME.registerState({
     initialState: gameState(),
@@ -58,9 +58,6 @@ AFRAME.registerComponent('vroomba-scene-setup', {
 
         sceneEl.appendChild(sky());
         sceneEl.appendChild(groundPlane());
-        sceneEl.appendChild(box());
-        sceneEl.appendChild(sphere());
-
 
         window.onkeyup = function(e) {
             if (e.key == 1){
