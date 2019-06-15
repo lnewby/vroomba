@@ -187,8 +187,7 @@
 
 	      var bufferZone = this.data.space;
 	      var targetPosition = this.data.target.object3D.position;
-	      //var currentPosition = this.el.object3D.position;
-	      var currentPosition = this.el.getAttribute('position');
+	      var currentPosition = this.el.object3D.position;
 
 	      directionVec3.copy(targetPosition).sub(currentPosition);
 

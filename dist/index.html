@@ -8,7 +8,7 @@
         <script src="lib/aframe-state-component.min.js"></script>
         <script src="lib/aframe-monster-system.js"></script>
         <script src="vroomba.min.js"></script>
-        <!--<script src="lib/main.js"></script>-->
+        <!-- <script src="lib/main.js"></script> -->
         <script src="./socket.io/socket.io.js"></script>
 
         <script type="text/javascript">
@@ -18,9 +18,7 @@
             var bufferSize = 15;
             var bufferPt = 0;
             var imageArray = [];
-
-            //var socket = io.connect('http://10.26.142.233:3000');
-            var socket = io.connect('http://10.183.15.70.:3000');
+            var socket = io.connect('http://localhost:3000');
 
             socket.on('position', function (data) {
                 //console.log(data);
@@ -53,8 +51,7 @@
                 },
 
                 init: function () {
-                    this.cam = document.querySelector('a-entity[camera]');
-                    this.playerbody = document.querySelector('#player');
+                    this.player = document.querySelector('#player');
                     this.playerDebug = document.querySelector('#player-debug');
                     this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
                 },
@@ -63,15 +60,14 @@
                     
                     var setPos = position === undefined ? null : JSON.parse(position);
                     if (setPos != null) {
-                        var offset = 1.6;
-                        this.el.setAttribute('position', {x: setPos.x, y: 0.2, z: setPos.z});
-                        this.playerbody.setAttribute('position', {x: setPos.x, y: offset, z: setPos.z});
-                        this.cam.setAttribute('position', {x: setPos.x, y: -offset, z: setPos.z})
+                        var newPos = {x: setPos.x, y: 1.6, z: setPos.z}
+                        this.el.setAttribute('position', {x: setPos.x, y: 0, z: setPos.z});
+                        this.player.setAttribute('position', newPos)
                         //console.log(setPos);
                     }
 
                     if (this.data.isVisiblePos) {
-                        this.playerDebug.setAttribute('text', {value: JSON.stringify(this.playerbody.getAttribute('position'))});
+                        this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
                     }
 
                 }
@@ -102,34 +98,33 @@
 
     <a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 1.6001, 0"></a-entity>
-        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 1.8 -3" visible="false" monster-prefab>
-            <a-sphere radius=0.05 color="#000000" position="0.111 0.139 0" kinematic-body></a-sphere>
-            <a-sphere radius=0.05 color="#000000" position="-0.111 0.139 0" kinematic-body></a-sphere>
+        <a-entity spawner="monster: #monster1" id="spawner1" position="0, 1.4001, 0"></a-entity>
+        <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 1.6 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
         </a-entity>
 
-        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 1.6001, 0"></a-entity>
-        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 1.75 -3" visible="false" monster-prefab>
-            <a-sphere radius=0.05 color="#000000" position="0.061 0.089 0" kinematic-body></a-sphere>
-            <a-sphere radius=0.05 color="#000000" position="-0.061 0.089 0" kinematic-body></a-sphere>
+        <a-entity spawner="monster: #monster2" id="spawner2" position="4, 1.4001, 0"></a-entity>
+        <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 1.55 -3" visible="false" monster-prefab>
+            <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
+            <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
         </a-entity>
         <a-entity monsters></a-entity>
 
         <a-entity shoot-controls vive-controls="hand: right"></a-entity>
 
-        <a-entity vehicle position="0 0.2 0">
-            <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
-            <a-entity camera="active: true" id="playerVision" position="0 -1.6 0" look-controls>
+        <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
+        <a-entity vehicle position="0 0 0">
+            <a-entity camera="active: true" position="0 1.6 0" look-controls>
                 <a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
                 <a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
             </a-entity>
-            
             <a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
             <a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 1.6 0"></a-entity>
             <a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 1.6 0"></a-entity>
         </a-entity>
 
-        <a-plane position="0 1.6 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+        <a-plane position="0 1.4 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
 
     </a-scene>
 

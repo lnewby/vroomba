@@ -16,5 +16,21 @@ if (process.env.NODE_ENV !== 'production') {
   }))
 }
 
-app.listen(port)
+var server1 = app.listen(port)
 console.log(`Listening at http://localhost:${port}`)
+
+const socket = require('socket.io');
+var io = socket(server1);
+
+io.on('connection', function(socket) {
+  console.log('a user connected');
+  socket.on('position', function(data) {
+    //console.log(data);
+    socket.broadcast.emit('position', data);
+  });
+  socket.on('camera', function(data) {
+    //console.log(data);
+    socket.broadcast.emit('camera', data);
+  });
+});
+io.listen(3000);
