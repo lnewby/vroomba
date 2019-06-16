@@ -4,7 +4,9 @@
 
 		schema: {
 			monsterType: {type: 'string'},
-			health: {type: 'number', default: 50}
+			health: {type: 'number', default: 50},
+			damageRate: {type: 'number', default: 100},
+			damagePt: {type: 'number', default: 10}
 		},
 
 		init: function () {
@@ -180,6 +182,7 @@
 
 	   init: function () {
 	      this.directionVec3 = new THREE.Vector3();
+	      this.playerDamageTracker = 0; 
 	   },
 	   
 	   tick: function (time, timeDelta) {
@@ -188,12 +191,23 @@
 	      var bufferZone = this.data.space;
 	      var targetPosition = this.data.target.object3D.position;
 	      var currentPosition = this.el.object3D.position;
-
 	      directionVec3.copy(targetPosition).sub(currentPosition);
-
 	      var distance = directionVec3.length();
-	      if (distance < bufferZone) { return; }
 
+	      // Monster hit damage player
+	      if (distance < bufferZone) {
+	      	if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
+	      		console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
+	      		this.playerDamageTracker = 0;
+	      	}
+	      	else {
+	      		this.playerDamageTracker++;
+	      	}
+
+	      	return;
+	      }
+
+	      // Move monster towards player
 	      this.el.object3D.lookAt(targetPosition);
 
 	      var factor = this.data.speed / distance;
