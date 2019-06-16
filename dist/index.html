@@ -73,14 +73,12 @@
                 }
             });
 
-            AFRAME.registerComponent('shoot-controls', {
+            AFRAME.registerComponent('vive-trigger', {
                 init: function () {
-                    console.log("Vive: config");
-                    this.el.addEventListener('triggerdown', () => {
-                        var cursor = document.querySelector('a-cursor');
-                        var target = cursor.detail.intersection.object.el;
-                        console.log("Vive: selected " + target.id);
-                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                    this.el.addEventListener('triggerdown', (e) => {
+                        let cursor = document.querySelector('a-cursor');
+                        var targetEl = cursor.components.cursor.intersectedEl;
+                        this.el.sceneEl.emit('entityHit', {entityId: targetEl.id});
                     });
                 }
             });
