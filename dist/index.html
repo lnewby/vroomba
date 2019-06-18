@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <script src="./lib/aframe.min.js"></script>
+		<script src="./socket.io/socket.io.js"></script>
+	</head>
+	<body>
+        
+        <script type="text/javascript">
+            var position = null;
+            var imageStream = null;
+            var bufferSize = 15;
+            var bufferPt = 0;
+            var imageArray = [];
+            var socket = io.connect('http://localhost:3000');
+
+            socket.on('position', function (data) {
+                //console.log(data);
+                position = data;
+            });
+
+            socket.on('camera', function (data) {
+                //console.log(data);
+                imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
+                if (bufferPt++ > bufferSize) { bufferPt = 0; }
+            });
+        </script>
+
+        <script type="text/javascript">
+
+            AFRAME.registerComponent('vehicle', {
+                schema: {
+                    isVisiblePos: {type: 'boolean', default: true},
+                    speed: {type: 'number', default: 0.002}
+                },
+
+                init: function () {
+                    this.player = document.querySelector('#player');
+                    this.playerDebug = document.querySelector('#player-debug');
+                    this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
+                },
+
+                tick: function () {
+                    
+                    var setPos = position === undefined ? null : JSON.parse(position);
+                    if (setPos != null) {
+                        var newPos = {x: setPos.x, y: 1.6, z: setPos.z}
+                        this.el.setAttribute('position', {x: setPos.x, y: 0, z: setPos.z});
+                        this.player.setAttribute('position', newPos)
+                        //console.log(setPos);
+                    }
+
+                    if (this.data.isVisiblePos) {
+                        this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
+                    }
+
+                }
+            });
+
+            AFRAME.registerComponent('backdrop', {
+                tick: function () {
+                    if (imageArray[bufferPt])
+                        this.el.setAttribute('src', imageArray[bufferPt]);
+                }
+            });
+
+        </script>
+
+		<a-scene>
+			<a-entity id="origin" geometry="primitive: cylinder; radius: 0.1; height: 0.4" position="0 1.6 0"></a-entity>
+
+			<a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
+			<a-entity vehicle position="0 0 0">
+	            <a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
+	                <a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
+	                <a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
+	            </a-entity>
+				<a-image backdrop src="" width="3.4" height="2.55" position="0 2.4 -2" color="pink"></a-image>
+			</a-entity>
+			<a-plane position="0 1.4 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+			<a-sky color="blue"></a-sky>
+		</a-scene>
+	</body>
+</html>
