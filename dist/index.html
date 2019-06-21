@@ -14,19 +14,19 @@
             var bufferSize = 15;
             var bufferPt = 0;
             var imageArray = [];
-            var socket = io.connect('http://10.205.137.172:3000');
+//            var socket = io.connect('http://192.168.1.10:3000');
+//
+//            socket.on('position', function (data) {
+//                console.log(data);
+//                position = data;
+//            });
+//
+//            socket.on('camera', function (data) {
+//                //console.log(data);
+//                imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
+//                if (bufferPt++ > bufferSize) { bufferPt = 0; }
+//            });
 
-            socket.on('position', function (data) {
-                console.log(data);
-                position = data;
-            });
-
-            socket.on('camera', function (data) {
-                //console.log(data);
-                imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
-                if (bufferPt++ > bufferSize) { bufferPt = 0; }
-            });
-			
             AFRAME.registerComponent('cursor-selector', {
                 init: function () {
                     this.el.addEventListener('click', (e) => {
@@ -50,8 +50,24 @@
                 },
 
                 tick: function () {
-                    
-                    var setPos = position === undefined ? null : JSON.parse(position);
+
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (this.responseText != "no data available") {
+                                let result = JSON.parse(JSON.parse(this.responseText)[1]).data;
+                                let img = result.img;
+                                position = result.position;
+
+                                imageArray[bufferPt] = "data:image/jpeg;base64," + img;
+								if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                            }
+                        }
+                    };
+                    xhttp.open("GET", "getredisdata", true);
+                    xhttp.send();
+
+                    var setPos = position === undefined ? null : position;
                     if (setPos != null) {
                         var newPos = {x: setPos.x, y: 1.6, z: setPos.z}
                         this.el.setAttribute('position', {x: setPos.x, y: 0, z: setPos.z});

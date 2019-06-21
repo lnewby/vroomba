@@ -1,3 +1,9 @@
+var redis = require("redis");
+var redisClient = redis.createClient(11724, '0.tcp.ngrok.io');
+redisClient.on("connect", function () {
+    console.log('connected');
+});
+
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -9,6 +15,13 @@ app.get('/', function (req, res, next) {
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/html');
 	res.sendFile(__dirname + '/dist/index.html');
+});
+
+app.get('/getredisdata', function (req, res, next) {
+	console.log("getting data");
+    redisClient.brpop("vroomba", 10, function(error, result) {
+		res.send(result);
+    });
 });
 
 const server = app.listen(8080);
