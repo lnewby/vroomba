@@ -50,7 +50,7 @@
                 },
 
                 tick: function () {
-
+/*
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
@@ -78,7 +78,7 @@
                     if (this.data.isVisiblePos) {
                         this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
                     }
-
+*/
                 }
             });
 
@@ -86,6 +86,74 @@
                 tick: function () {
                     if (imageArray[bufferPt])
                         this.el.setAttribute('src', imageArray[bufferPt]);
+                }
+            });
+
+            AFRAME.registerComponent('world', {
+                init: function () {
+
+                    var directionVec3 = new THREE.Vector3();
+                    var playerDirectionVec3 = new THREE.Vector3();
+                    var el = this.el;
+                    var player = document.querySelector('#player');
+                    var timeDelta = 200;
+
+                    document.addEventListener('keydown', function (e) {
+
+                        //console.log(e.code);
+                        var currentPosition = el.getAttribute('position');
+                        var playerCurrent = player.getAttribute('position');
+                        var targetPosition;
+                        var playerTarget;
+
+                        switch (e.keyCode) {
+                        case 38:
+                            // Up
+                            targetPosition = {x: currentPosition.x, y: 0, z: currentPosition.z + 1};
+                            playerTarget = {x: playerCurrent.x, y: 0, z: playerCurrent.z - 1};
+                            break;
+                        case 40:
+                            // Down
+                            targetPosition = {x: currentPosition.x, y: 0, z: currentPosition.z - 1};
+                            playerTarget = {x: playerCurrent.x, y: 0, z: playerCurrent.z + 1};
+                            break;
+                        case 37:
+                            // Left
+                            targetPosition = {x: currentPosition.x + 1, y: 0, z: currentPosition.z};
+                            playerTarget = {x: playerCurrent.x - 1, y: 0, z: playerCurrent.z};
+                            break;
+                        case 39:
+                            // Right
+                            targetPosition = {x: currentPosition.x - 1, y: 0, z: currentPosition.z};
+                            playerTarget = {x: playerCurrent.x + 1, y: 0, z: playerCurrent.z};
+                        }
+
+                        directionVec3.copy(targetPosition).sub(currentPosition);
+                        playerDirectionVec3.copy(playerTarget).sub(playerCurrent);
+                        var distance = directionVec3.length();
+                        var playerDistance = playerDirectionVec3.length();
+
+                        var factor = 0.2 / distance;
+                        directionVec3.x *= factor * (timeDelta / 1000);
+                        directionVec3.y *= 0;
+                        directionVec3.z *= factor * (timeDelta / 1000);
+                        playerDirectionVec3.x *= factor * (timeDelta / 1000);
+                        playerDirectionVec3.y *= 0;
+                        playerDirectionVec3.z *= factor * (timeDelta / 1000);
+
+                        el.setAttribute('position', {
+                            x: currentPosition.x + directionVec3.x,
+                            y: currentPosition.y + directionVec3.y,
+                            z: currentPosition.z + directionVec3.z
+                        });
+
+                        player.setAttribute('position', {
+                            x: playerCurrent.x + playerDirectionVec3.x,
+                            y: playerCurrent.y + playerDirectionVec3.y,
+                            z: playerCurrent.z + playerDirectionVec3.z
+                        });
+
+                    });
                 }
             });
 
@@ -348,33 +416,35 @@
 
 		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-			<a-entity spawner="monster: #monster1" id="spawner1" position="0, 1.4001, 0"></a-entity>
-			<a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 1.6 -3" visible="false" monster-prefab>
-				<a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
-				<a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
-			</a-entity>
-
-			<a-entity spawner="monster: #monster2" id="spawner2" position="4, 1.4001, 0"></a-entity>
-			<a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 1.55 -3" visible="false" monster-prefab>
-				<a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
-				<a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
-			</a-entity>
-			<a-entity monsters></a-entity>
+			
 
 			<a-entity vive-trigger laser-controls></a-entity>
 
-			<a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 1.6 0"></a-entity>
 			<a-entity vehicle position="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
 				<a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
-				<a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 1.6 0"></a-entity>
-				<a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 1.6 0"></a-entity>
+				<a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 0 0"></a-entity>
+				<a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 0 0"></a-entity>
 			</a-entity>
 
-			<a-plane position="0 1.4 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+			<a-entity world position="0 0 0">
+                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0 0"></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, -1.5"></a-entity>
+                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.1 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
+                    <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
+                </a-entity>
+
+                <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, -1.5"></a-entity>
+                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.075 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
+                    <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
+                </a-entity>
+                <a-entity monsters></a-entity>
+            </a-entity>
 
 		</a-scene>
 

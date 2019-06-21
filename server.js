@@ -1,8 +1,10 @@
+/*
 var redis = require("redis");
 var redisClient = redis.createClient(11724, '0.tcp.ngrok.io');
 redisClient.on("connect", function () {
     console.log('connected');
 });
+*/
 
 const express = require('express');
 const cors = require('cors');
@@ -25,6 +27,7 @@ app.get('/getredisdata', function (req, res, next) {
 });
 
 const server = app.listen(8080);
+/*
 const socket = require('socket.io');
 var io = socket(server);
 
@@ -42,3 +45,4 @@ io.on('connection', function(socket) {
 	});
 });
 io.listen(3000);
+*/
