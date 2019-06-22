@@ -4,7 +4,7 @@
 	    <script src="./lib/aframe.min.js"></script>
 		<script src="./lib/aframe-state-component.min.js"></script>
 		<script src="./lib/aframe-monster-system.js"></script>
-		<script src="./socket.io/socket.io.js"></script>
+		<!-- <script src="./socket.io/socket.io.js"></script> -->
 	</head>
 	<body>
         
@@ -27,6 +27,24 @@
 //                if (bufferPt++ > bufferSize) { bufferPt = 0; }
 //            });
 
+
+            var url="http://localhost:8080/getredisdata";
+
+            function worker() {
+                fetch(url).then(response => response.json())
+                    .then( (result) => {
+                        //console.log('success:', result);
+                        let j = JSON.parse(result[1]).data;
+                        position = j.position;
+                        imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+                        if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                    })
+                    .catch(error => console.log('error:', error));
+                setTimeout("worker()", 60);
+            }
+
+            worker();
+
             AFRAME.registerComponent('cursor-selector', {
                 init: function () {
                     this.el.addEventListener('click', (e) => {
@@ -39,22 +57,22 @@
 
             AFRAME.registerComponent('vehicle', {
                 schema: {
-                    isVisiblePos: {type: 'boolean', default: true},
-                    speed: {type: 'number', default: 0.002}
+                    isVisiblePos: {type: 'boolean', default: true}
                 },
 
                 init: function () {
-                    this.player = document.querySelector('#player');
+                    //this.player = document.querySelector('#player');
+
                     this.playerDebug = document.querySelector('#player-debug');
                     this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
                 },
-
-                tick: function () {
 /*
+                tick: function () {
+
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (this.responseText != "no data available") {
+                            if (this.responseText) {
                                 let result = JSON.parse(JSON.parse(this.responseText)[1]).data;
                                 let img = result.img;
                                 position = result.position;
@@ -76,36 +94,47 @@
                     }
 
                     if (this.data.isVisiblePos) {
-                        this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
+                        //this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
+                        this.playerDebug.setAttribute('text', {value: JSON.stringify(position)});
                     }
-*/
                 }
+*/
             });
 
             AFRAME.registerComponent('backdrop', {
                 tick: function () {
-                    if (imageArray[bufferPt])
-                        this.el.setAttribute('src', imageArray[bufferPt]);
+                    //if (imageArray[bufferPt])
+                    //    this.el.setAttribute('src', imageArray[bufferPt]);
                 }
             });
 
             AFRAME.registerComponent('world', {
+
                 init: function () {
+                    this.xmitter = document.querySelector('#pos-transmit');
+                    this.player = document.querySelector('#player');
 
-                    var directionVec3 = new THREE.Vector3();
-                    var playerDirectionVec3 = new THREE.Vector3();
-                    var el = this.el;
-                    var player = document.querySelector('#player');
-                    var timeDelta = 200;
+                    this.playerDebug = document.querySelector('#player-debug');
+                    this.directionVec3 = new THREE.Vector3();
+                    this.playerDirectionVec3 = new THREE.Vector3();
+                },
 
-                    document.addEventListener('keydown', function (e) {
+                tick: function (time, timeDelta) {
 
-                        //console.log(e.code);
-                        var currentPosition = el.getAttribute('position');
-                        var playerCurrent = player.getAttribute('position');
-                        var targetPosition;
-                        var playerTarget;
+                    var setPos = position === undefined ? null : position;
+                    
+                    if (setPos != null) {
+                    //document.addEventListener('keydown', function (e) {
 
+                        this.xmitter.setAttribute('position', setPos);
+
+                        var currentPosition = this.el.getAttribute('position');
+                        var playerCurrent = this.player.getAttribute('position');
+                        var targetPosition = {x: currentPosition.x + setPos.x, y: 0, z: currentPosition.z + setPos.z};
+                        var playerTarget = {x: playerCurrent.x - setPos.x, y: 0, z: playerCurrent.z - setPos.z};
+
+                        /*
+                        console.log(e.code);
                         switch (e.keyCode) {
                         case 38:
                             // Up
@@ -127,33 +156,37 @@
                             targetPosition = {x: currentPosition.x - 1, y: 0, z: currentPosition.z};
                             playerTarget = {x: playerCurrent.x + 1, y: 0, z: playerCurrent.z};
                         }
-
-                        directionVec3.copy(targetPosition).sub(currentPosition);
-                        playerDirectionVec3.copy(playerTarget).sub(playerCurrent);
-                        var distance = directionVec3.length();
-                        var playerDistance = playerDirectionVec3.length();
+                        */
+/*
+                        this.directionVec3.copy(targetPosition).sub(currentPosition);
+                        this.playerDirectionVec3.copy(playerTarget).sub(playerCurrent);
+                        var distance = this.directionVec3.length();
+                        var playerDistance = this.playerDirectionVec3.length();
 
                         var factor = 0.2 / distance;
-                        directionVec3.x *= factor * (timeDelta / 1000);
-                        directionVec3.y *= 0;
-                        directionVec3.z *= factor * (timeDelta / 1000);
-                        playerDirectionVec3.x *= factor * (timeDelta / 1000);
-                        playerDirectionVec3.y *= 0;
-                        playerDirectionVec3.z *= factor * (timeDelta / 1000);
+                        
+                        this.directionVec3.x *= factor * (timeDelta / 1000);
+                        this.directionVec3.y *= 0;
+                        this.directionVec3.z *= factor * (timeDelta / 1000);
+                        
+                        this.playerDirectionVec3.x *= factor * (timeDelta / 1000);
+                        this.playerDirectionVec3.y *= 0;
+                        this.playerDirectionVec3.z *= factor * (timeDelta / 1000);
 
-                        el.setAttribute('position', {
-                            x: currentPosition.x + directionVec3.x,
-                            y: currentPosition.y + directionVec3.y,
-                            z: currentPosition.z + directionVec3.z
+                        this.el.setAttribute('position', {
+                            x: currentPosition.x + this.directionVec3.x,
+                            y: currentPosition.y + this.directionVec3.y,
+                            z: currentPosition.z + this.directionVec3.z
                         });
 
-                        player.setAttribute('position', {
-                            x: playerCurrent.x + playerDirectionVec3.x,
-                            y: playerCurrent.y + playerDirectionVec3.y,
-                            z: playerCurrent.z + playerDirectionVec3.z
+                        this.player.setAttribute('position', {
+                            x: playerCurrent.x + this.playerDirectionVec3.x,
+                            y: playerCurrent.y + this.playerDirectionVec3.y,
+                            z: playerCurrent.z + this.playerDirectionVec3.z
                         });
-
-                    });
+*/
+                        //});
+                    }
                 }
             });
 
@@ -416,7 +449,7 @@
 
 		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-			
+			<a-entity id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0 0 "></a-entity>
 
 			<a-entity vive-trigger laser-controls></a-entity>
 
