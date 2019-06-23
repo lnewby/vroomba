@@ -9,11 +9,13 @@
 	<body>
         
         <script type="text/javascript">
-            var position = null;
+            var position = new THREE.Vector3();
+            var prevPosition = new THREE.Vector3();
             var imageStream = null;
             var bufferSize = 15;
             var bufferPt = 0;
             var imageArray = [];
+
 //            var socket = io.connect('http://192.168.1.10:3000');
 //
 //            socket.on('position', function (data) {
@@ -28,9 +30,10 @@
 //            });
 
 
+            //Fetch data from Redis
             var url="http://localhost:8080/getredisdata";
 
-            function worker() {
+            function worker () {
                 fetch(url).then(response => response.json())
                     .then( (result) => {
                         //console.log('success:', result);
@@ -40,20 +43,11 @@
                         if (bufferPt++ > bufferSize) { bufferPt = 0; }
                     })
                     .catch(error => console.log('error:', error));
-                setTimeout("worker()", 60);
+                setTimeout("worker ()", 60);
             }
 
-            worker();
+            worker ();
 
-            AFRAME.registerComponent('cursor-selector', {
-                init: function () {
-                    this.el.addEventListener('click', (e) => {
-                        var target = e.detail.intersection.object.el;
-                        console.log("Cursor: selected " + target.id);
-                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
-                    });
-                }
-            });
 
             AFRAME.registerComponent('vehicle', {
                 schema: {
@@ -65,7 +59,53 @@
 
                     this.playerDebug = document.querySelector('#player-debug');
                     this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
+                }
+            });
+
+            //Stream images to screen
+            AFRAME.registerComponent('backdrop', {
+                tick: function () {
+                    //if (imageArray[bufferPt])
+                    //    this.el.setAttribute('src', imageArray[bufferPt]);
+                }
+            });
+
+            //Simulate cam data with arrow key
+            AFRAME.registerComponent('xmitter', {
+/*
+                init: function () {
+                    
+                    var offset = 0.1;
+                    
+                    document.addEventListener('keydown', (e) => {
+
+                        var currentPosition = this.el.getAttribute('position');
+
+                        //console.log(e.code);
+                        switch (e.keyCode) {
+                        case 38:
+                            // Up
+                            position = {x: currentPosition.x, y: 0, z: currentPosition.z - offset};
+                            break;
+                        case 40:
+                            // Down
+                            position = {x: currentPosition.x, y: 0, z: currentPosition.z + offset};
+                            break;
+                        case 37:
+                            // Left
+                            position = {x: currentPosition.x - offset, y: 0, z: currentPosition.z};
+                            break;
+                        case 39:
+                            // Right
+                            position = {x: currentPosition.x + offset, y: 0, z: currentPosition.z};
+                            break;
+                        }
+
+                        this.el.setAttribute('position', position);
+
+                    });
                 },
+*/
 /*
                 tick: function () {
 
@@ -78,7 +118,7 @@
                                 position = result.position;
 
                                 imageArray[bufferPt] = "data:image/jpeg;base64," + img;
-								if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                                if (bufferPt++ > bufferSize) { bufferPt = 0; }
                             }
                         }
                     };
@@ -99,13 +139,7 @@
                     }
                 }
 */
-            });
 
-            AFRAME.registerComponent('backdrop', {
-                tick: function () {
-                    //if (imageArray[bufferPt])
-                    //    this.el.setAttribute('src', imageArray[bufferPt]);
-                }
             });
 
             AFRAME.registerComponent('world', {
@@ -117,76 +151,34 @@
                     this.playerDebug = document.querySelector('#player-debug');
                     this.directionVec3 = new THREE.Vector3();
                     this.playerDirectionVec3 = new THREE.Vector3();
+
                 },
 
                 tick: function (time, timeDelta) {
 
-                    var setPos = position === undefined ? null : position;
+                    var newPosition = position === undefined ? null : position;
                     
-                    if (setPos != null) {
-                    //document.addEventListener('keydown', function (e) {
+                    if (newPosition != null) {
 
-                        this.xmitter.setAttribute('position', setPos);
+                        this.xmitter.setAttribute('position', newPosition);
 
                         var currentPosition = this.el.getAttribute('position');
                         var playerCurrent = this.player.getAttribute('position');
-                        var targetPosition = {x: currentPosition.x + setPos.x, y: 0, z: currentPosition.z + setPos.z};
-                        var playerTarget = {x: playerCurrent.x - setPos.x, y: 0, z: playerCurrent.z - setPos.z};
-
-                        /*
-                        console.log(e.code);
-                        switch (e.keyCode) {
-                        case 38:
-                            // Up
-                            targetPosition = {x: currentPosition.x, y: 0, z: currentPosition.z + 1};
-                            playerTarget = {x: playerCurrent.x, y: 0, z: playerCurrent.z - 1};
-                            break;
-                        case 40:
-                            // Down
-                            targetPosition = {x: currentPosition.x, y: 0, z: currentPosition.z - 1};
-                            playerTarget = {x: playerCurrent.x, y: 0, z: playerCurrent.z + 1};
-                            break;
-                        case 37:
-                            // Left
-                            targetPosition = {x: currentPosition.x + 1, y: 0, z: currentPosition.z};
-                            playerTarget = {x: playerCurrent.x - 1, y: 0, z: playerCurrent.z};
-                            break;
-                        case 39:
-                            // Right
-                            targetPosition = {x: currentPosition.x - 1, y: 0, z: currentPosition.z};
-                            playerTarget = {x: playerCurrent.x + 1, y: 0, z: playerCurrent.z};
-                        }
-                        */
-/*
-                        this.directionVec3.copy(targetPosition).sub(currentPosition);
-                        this.playerDirectionVec3.copy(playerTarget).sub(playerCurrent);
-                        var distance = this.directionVec3.length();
-                        var playerDistance = this.playerDirectionVec3.length();
-
-                        var factor = 0.2 / distance;
-                        
-                        this.directionVec3.x *= factor * (timeDelta / 1000);
-                        this.directionVec3.y *= 0;
-                        this.directionVec3.z *= factor * (timeDelta / 1000);
-                        
-                        this.playerDirectionVec3.x *= factor * (timeDelta / 1000);
-                        this.playerDirectionVec3.y *= 0;
-                        this.playerDirectionVec3.z *= factor * (timeDelta / 1000);
-
-                        this.el.setAttribute('position', {
-                            x: currentPosition.x + this.directionVec3.x,
-                            y: currentPosition.y + this.directionVec3.y,
-                            z: currentPosition.z + this.directionVec3.z
-                        });
-
-                        this.player.setAttribute('position', {
-                            x: playerCurrent.x + this.playerDirectionVec3.x,
-                            y: playerCurrent.y + this.playerDirectionVec3.y,
-                            z: playerCurrent.z + this.playerDirectionVec3.z
-                        });
-*/
-                        //});
+                        this.directionVec3.copy(newPosition).sub(prevPosition);
+                        this.el.setAttribute('position', {x: currentPosition.x - this.directionVec3.x, y: 0, z: currentPosition.z - this.directionVec3.z});
+                        this.player.setAttribute('position', {x: playerCurrent.x + this.directionVec3.x, y: 0, z: playerCurrent.z + this.directionVec3.z});
                     }
+                    prevPosition = position;
+                }
+            });
+
+            AFRAME.registerComponent('cursor-selector', {
+                init: function () {
+                    this.el.addEventListener('click', (e) => {
+                        var target = e.detail.intersection.object.el;
+                        console.log("Cursor: selected " + target.id);
+                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                    });
                 }
             });
 
@@ -449,7 +441,7 @@
 
 		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-			<a-entity id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0 0 "></a-entity>
+			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0 0 "></a-entity>
 
 			<a-entity vive-trigger laser-controls></a-entity>
 
