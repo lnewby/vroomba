@@ -5,29 +5,35 @@
         schema: {
             monsterType: {type: 'string'},
             health: {type: 'number', default: 50},
+            maxHealth: {type: 'number'},
+            healthBarWidth: {type: 'number', default: 0.2},
+            healthBarHeight: {type: 'number', default: 0.02},
             damageRate: {type: 'number', default: 100},
             damagePt: {type: 'number', default: 10}
         },
 
         init: function () {
+            this.data.maxHealth = this.data.health;
 
-            var healthBar = this.el.querySelector('a-entity[text]');
+            //var healthBar = this.el.querySelector('a-entity[text]');
+            var healthBar = this.el.querySelector('a-plane');
 
             //console.log("Monster: add health bar to " + this.el.id);
-            if (healthBar) {
-                healthBar.setAttribute('text', {value: this.data.health});
-            } else {
-                healthBar = document.createElement('a-entity');
+            if (!healthBar) {
+                healthBar = document.createElement('a-plane');
+                healthBar.setAttribute('width', this.data.healthBarWidth);
+                healthBar.setAttribute('height', this.data.healthBarHeight);
+                healthBar.setAttribute('color', 'green');
                 this.el.appendChild(healthBar);
             }
 
-            healthBar.setAttribute('text', {
-                value: this.data.health,
-                width: 0.5,
-                wrapCount: 9,
-                align: 'center',
-                color: 'pink'
-            });
+            // healthBar.setAttribute('text', {
+            //     value: this.data.health,
+            //     width: 0.5,
+            //     wrapCount: 9,
+            //     align: 'center',
+            //     color: 'pink'
+            // });
             healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0});
         }
 
@@ -65,20 +71,24 @@
 
             // TO DO if monster doesn't exist
 
-            if ((el != null) && (el.getAttribute('monster')) && (currentHealth = el.getAttribute('monster').health)) {
+            var monsterData = el.getAttribute('monster');
+
+            if ((el != null) && (el.getAttribute('monster')) && (currentHealth = monsterData.health)) {
                 if (currentHealth > damagePoint) {
                     // If monster still has health, reduce health
 
                     var remainingHealth = currentHealth - damagePoint;
 
                     el.setAttribute('monster', {health: remainingHealth});
-                    el.querySelector('a-entity[text]').setAttribute('text', {value: remainingHealth});
+                    var healthBarValue = (remainingHealth/monsterData.maxHealth) * monsterData.healthBarWidth;
+                    el.querySelector('a-plane').setAttribute('width', healthBarValue);
+                    //el.querySelector('a-entity[text]').setAttribute('text', {value: remainingHealth});
                     //console.log("Monster: hit " + el.id + " " + currentHealth + "->" + remainingHealth);
                 } else {
                     // else remove monster
-                    el.setAttribute('monster', {health: 0});
-                    el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
-                    console.log("Monster: died");
+                    //el.setAttribute('monster', {health: 0});
+                    //el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
+                    //console.log("Monster: died");
                     this.unregisterMonster(el);
                     this.el.sceneEl.emit('enemyDefeated');
                 }
@@ -87,7 +97,7 @@
         },
 
         unregisterMonster: function (el) {
-            console.log("Monster: remove");
+            console.log("Monster: removed");
             document.querySelector('a-entity[monsters]').removeChild(el);
 
             // TO DO: animate explode
