@@ -1,6 +1,6 @@
 
 var redis = require("redis");
-var redisClient = redis.createClient(6379, '192.168.1.6');
+var redisClient = redis.createClient(6379, 'localhost');
 //redisClient.auth("pf60fdc52fbcdbef653d7936622dd3b332fec2da875a2e928a2bdd8d15eb7edb0");
 redisClient.on("connect", function () {
     console.log('connected');
