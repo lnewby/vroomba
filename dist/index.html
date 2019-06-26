@@ -190,6 +190,7 @@
                     currentLevel: 1,
                     endLevel: 3,
                     enemyIds: [],
+					defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     levelMap: {
                         1: {
@@ -236,6 +237,13 @@
                         }
                     },
                     enemyDefeated: function(state, action){
+                        let enemyId = action.enemyId;
+                        if (state.enemyIds.includes(enemyId)){
+                            state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+                                return value != enemyId;
+                            });
+						}
+						state.defeatedEnemyIds.push(enemyId);
                         state.enemiesDefeated += 1;
                         if (!(state.currentLevel > state.endLevel)) {
                             state.levelMap[state.currentLevel].enemiesDefeated += 1;
@@ -397,17 +405,22 @@
                         if (id == player.id){
                             continue;
                         }
-                        var el = document.querySelector('#' + id);
+                        var el = document.querySelector('#' + id); //monster
                         var elPosition = el.getAttribute('position');
                         if (el != null) {
+                            //distance from player to current iterated monster
                             let d = Math.sqrt(((playerPosition.x - elPosition.x)*(playerPosition.x - elPosition.x))
                                 + ((playerPosition.z - elPosition.z)*(playerPosition.z - elPosition.z)));
+                            //distance from the monster hit to the current iterated monster
                             let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x))
                                 + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
                             console.log("d: " + d.toFixed(2));
                             if (Math.abs(d2target) < 3) {
-                                let newX = playerPosition.x - (((d + 1.5) * (playerPosition.x - elPosition.x)) / d);
-                                let newZ = playerPosition.z - (((d + 1.5) * (playerPosition.z - elPosition.z)) / d);
+                                //**Change targetPosition to to playerPosition in the next 2 lines to make
+								//the monsters move directly away from player instead of away from the monster who was hit
+								//**Change the (d+#) to any value to modify the distance that the monsters are pushed away
+                                let newX = targetPosition.x - (((d + 5) * (targetPosition.x - elPosition.x)) / d);
+                                let newZ = targetPosition.z - (((d + 5) * (targetPosition.z - elPosition.z)) / d);
                                 var newPos = {
                                     x: newX,
                                     y: elPosition.y,

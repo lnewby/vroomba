@@ -91,7 +91,7 @@
                     //el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
                     //console.log("Monster: died");
                     this.unregisterMonster(el);
-                    this.el.sceneEl.emit('enemyDefeated');
+                    this.el.sceneEl.emit('enemyDefeated', {enemyId: el.id});
                 }
             }
 
