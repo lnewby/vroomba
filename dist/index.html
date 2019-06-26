@@ -85,19 +85,19 @@
                         switch (e.keyCode) {
                         case 38:
                             // Up
-                            position = {x: currentPosition.x, y: 0, z: currentPosition.z - offset};
+                            position = {x: currentPosition.x, y: 0.2, z: currentPosition.z - offset};
                             break;
                         case 40:
                             // Down
-                            position = {x: currentPosition.x, y: 0, z: currentPosition.z + offset};
+                            position = {x: currentPosition.x, y: 0.2, z: currentPosition.z + offset};
                             break;
                         case 37:
                             // Left
-                            position = {x: currentPosition.x - offset, y: 0, z: currentPosition.z};
+                            position = {x: currentPosition.x - offset, y: 0.2, z: currentPosition.z};
                             break;
                         case 39:
                             // Right
-                            position = {x: currentPosition.x + offset, y: 0, z: currentPosition.z};
+                            position = {x: currentPosition.x + offset, y: 0.2, z: currentPosition.z};
                             break;
                         }
 
@@ -165,8 +165,8 @@
                         var currentPosition = this.el.getAttribute('position');
                         var playerCurrent = this.player.getAttribute('position');
                         this.directionVec3.copy(newPosition).sub(prevPosition);
-                        this.el.setAttribute('position', {x: currentPosition.x - this.directionVec3.x, y: 0, z: currentPosition.z - this.directionVec3.z});
-                        this.player.setAttribute('position', {x: playerCurrent.x + this.directionVec3.x, y: 0, z: playerCurrent.z + this.directionVec3.z});
+                        this.el.setAttribute('position', {x: currentPosition.x - this.directionVec3.x, y: 0.2, z: currentPosition.z - this.directionVec3.z});
+                        this.player.setAttribute('position', {x: playerCurrent.x + this.directionVec3.x, y: 0.2, z: playerCurrent.z + this.directionVec3.z});
                     }
                     prevPosition = position;
                 }
@@ -453,7 +453,7 @@
 
 		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
 
-			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0 0 "></a-entity>
+			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
             
             <a-entity shoot-controls vive-controls="hand: right"></a-entity>
 			<a-entity vive-trigger laser-controls></a-entity>
@@ -463,23 +463,26 @@
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
-				<a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
-				<a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 0 0"></a-entity>
-				<a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 0 0"></a-entity>
+				<a-image backdrop src="" width="20.56" height="10.24" position="0 1 -5"></a-image>
+				<a-entity id="right-wall" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 27.5 0" position="0.8 1 0"></a-entity>
+				<a-entity id="left-wall" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 151 0" position="-0.8 1 0"></a-entity>
+                <a-entity id="ceiling" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 0 90" position="0 2 0"></a-entity>
+                <a-entity id="floor" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 0 90" position="0 0 0"></a-entity>
+                <a-entity id="front-wall" geometry="primitive: box; height: 1; width: 0.1; depth: 1.5" material="color: #607d8b" rotation="0 90 0" position="0 0.5 -0.5"></a-entity>
 			</a-entity>
 
 			<a-entity world position="0 0 0">
-                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0 0"></a-entity>
-                <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, -1.5"></a-entity>
-                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.2" material="color: teal" position="0 0.1 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.05 color="#000000" position="0.111 0 0.139" kinematic-body></a-sphere>
-                    <a-sphere radius=0.05 color="#000000" position="-0.111 0 0.139" kinematic-body></a-sphere>
+                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.6" material="color: teal" position="0 0.6 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.15 color="#000000" position="0.3 0.2 0.4" kinematic-body></a-sphere>
+                    <a-sphere radius=0.15 color="#000000" position="-0.3 0.2 0.4" kinematic-body></a-sphere>
                 </a-entity>
 
-                <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, -1.5"></a-entity>
-                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.15" material="color: red" position="0 0.075 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.05 color="#000000" position="0.061 0 0.089" kinematic-body></a-sphere>
-                    <a-sphere radius=0.05 color="#000000" position="-0.061 0 0.089" kinematic-body></a-sphere>
+                <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.45" material="color: red" position="0 0.45 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.15 color="#000000" position="0.2 0 0.3" kinematic-body></a-sphere>
+                    <a-sphere radius=0.15 color="#000000" position="-0.2 0 0.3" kinematic-body></a-sphere>
                 </a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
@@ -497,22 +500,22 @@
             let pullButton = document.createElement('a-entity');
             pullButton.setAttribute('id', 'pull');
             pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            pullButton.setAttribute('position', {x: -0.046, y:0.085, z:0.371});
+            pullButton.setAttribute('position', {x: -0.046, y:0.55, z:0.371});
             pullButton.setAttribute('material', {color: 'purple'});
             let pushButton = document.createElement('a-entity');
             pushButton.setAttribute('id', 'push');
             pushButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            pushButton.setAttribute('position', {x: -0.069, y:-0.069, z:0.371});
+            pushButton.setAttribute('position', {x: -0.069, y:0.39, z:0.371});
             pushButton.setAttribute('material', {color: 'orange'});
             let areaButton = document.createElement('a-entity');
             areaButton.setAttribute('id', 'areaOfEffect');
             areaButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            areaButton.setAttribute('position', {x: -0.041, y:0.085, z:-0.371});
+            areaButton.setAttribute('position', {x: -0.041, y:0.55, z:-0.371});
             areaButton.setAttribute('material', {color: 'red'});
             let sniperButton = document.createElement('a-entity');
             sniperButton.setAttribute('id', 'sniper');
             sniperButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            sniperButton.setAttribute('position', {x: -0.041, y:-0.069, z:-0.371});
+            sniperButton.setAttribute('position', {x: -0.041, y:0.39, z:-0.371});
             sniperButton.setAttribute('material', {color: 'blue'});
             leftWall.appendChild(pullButton);
             leftWall.appendChild(pushButton);

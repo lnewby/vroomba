@@ -6,8 +6,8 @@
             monsterType: {type: 'string'},
             health: {type: 'number', default: 50},
             maxHealth: {type: 'number'},
-            healthBarWidth: {type: 'number', default: 0.2},
-            healthBarHeight: {type: 'number', default: 0.02},
+            healthBarWidth: {type: 'number', default: 0.7},
+            healthBarHeight: {type: 'number', default: 0.06},
             damageRate: {type: 'number', default: 100},
             damagePt: {type: 'number', default: 10}
         },
@@ -34,7 +34,7 @@
             //     align: 'center',
             //     color: 'pink'
             // });
-            healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0});
+            healthBar.setAttribute('position', {x: 0, y: 0.727, z: 0});
         }
 
     });
@@ -58,7 +58,7 @@
                 var monster_id = 'MM_' + monster.object3D.uuid;
                 monster.setAttribute('id', monster_id);
                 monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
-                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.5});
+                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 1.5});
                 monster.setAttribute('visible', true);
                 //console.log('Monster ID: MM_' + monster_id);
 
@@ -187,7 +187,7 @@
         schema: {
             target: {type: 'selector'},
             speed: {type: 'number'},
-            space: {type: 'number', default: 0.5},
+            space: {type: 'number', default: 1},
         },
 
         init: function () {
