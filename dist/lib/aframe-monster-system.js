@@ -57,6 +57,7 @@
 
                 var monster_id = 'MM_' + monster.object3D.uuid;
                 monster.setAttribute('id', monster_id);
+                monster.setAttribute('class', 'collidable');
                 monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
                 monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 1.5});
                 monster.setAttribute('visible', true);

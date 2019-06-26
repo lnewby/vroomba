@@ -182,16 +182,6 @@
                 }
             });
 
-            AFRAME.registerComponent('vive-trigger', {
-                init: function () {
-                    this.el.addEventListener('triggerdown', (e) => {
-                        let cursor = document.querySelector('a-cursor');
-                        var targetEl = cursor.components.cursor.intersectedEl;
-                        this.el.sceneEl.emit('entityHit', {entityId: targetEl.id});
-                    });
-                }
-            });
-
             AFRAME.registerState({
                 initialState: {
                     playerHealth: 50,
@@ -200,6 +190,7 @@
                     currentLevel: 1,
                     endLevel: 3,
                     enemyIds: [],
+                    enemiesRayHitIds: [],
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
@@ -220,6 +211,11 @@
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
                         state.enemyIds.push(enemyId);
+                    },
+                    enemyHit: function(state, action) {
+                        for (let id of state.enemiesRayHitIds) {
+                            AFRAME.scenes[0].emit('entityHit', {entityId: id});
+                        }
                     },
                     entityHit: function(state, action){
                         let systems = AFRAME.scenes[0].systems;
@@ -259,7 +255,18 @@
                     },
                     weaponChanged: function(state, action){
                         AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
-                    }
+                    },
+                    addEnemiesRayHit: function(state, action){
+                        let id = action.id;
+                        state.enemiesRayHitIds.push(id);
+                    },
+                    removeEnemiesRayHit: function(state, action){
+                        let ids = action.ids;
+
+                        for (let id of ids) {
+                            state.enemiesRayHitIds.pop(id);    
+                        } 
+                    },
                 }
             });
 
@@ -437,14 +444,23 @@
                 }
             });
 
-            AFRAME.registerComponent('shoot-controls', {
+            AFRAME.registerComponent('collider-check', {
+                dependencies: ['raycaster'],
+
                 init: function () {
-                    console.log("Vive: config");
+                    const sceneEl = document.querySelector('a-scene');
+                    // Use events to figure out what raycaster is listening so we don't have to
+                    // hardcode the raycaster.
+                    this.el.addEventListener('raycaster-intersection', evt => {
+                        this.enemyId = evt.detail.els[0].id;
+                        sceneEl.emit('addEnemiesRayHit', {id: this.enemyId});
+                    });
+                    this.el.addEventListener('raycaster-intersection-cleared', evt => {
+                        this.enemyIds = evt.detail.clearedEls.map(el => el.id);
+                        sceneEl.emit('removeEnemiesRayHit', {ids: this.enemyIds});
+                    });
                     this.el.addEventListener('triggerdown', () => {
-                        var cursor = document.querySelector('a-cursor');
-                        var target = cursor.detail.intersection.object.el;
-                        console.log("Vive: selected " + target.id);
-                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                        sceneEl.emit('enemyHit', {});
                     });
                 }
             });
@@ -455,9 +471,9 @@
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
             
-            <a-entity shoot-controls vive-controls="hand: right"></a-entity>
-			<a-entity vive-trigger laser-controls></a-entity>
-
+            <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            
 			<a-entity vehicle position="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
