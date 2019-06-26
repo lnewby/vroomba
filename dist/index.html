@@ -349,20 +349,24 @@
                     return this.data.damage;
                 },
 
-                doEffect: function(player, target, enemyIds){
-                    let currentTime = new Date().getTime();
-                    let cooldownStart = this.data.cooldownList[this.data.effect];
-                    let timeSinceCooldownStarted = currentTime - cooldownStart;
-                    if (isNaN(timeSinceCooldownStarted) || timeSinceCooldownStarted > this.data.cooldownTime) {
-                        this.data.cooldownList[this.data.effect] = currentTime;
-                        if (this.data.effect == "pull") {
-                            this.moveMonstersToTarget(target, enemyIds);
-                        } else if (this.data.effect == "push") {
-                            this.blastMonstersAwayFromTarget(player, target, enemyIds);
+                doEffect: function (player, target, enemyIds) {
+                    if (this.data.effect == "pull" || this.data.effect == "push") {
+                        let currentTime = new Date().getTime();
+                        let cooldownStart = this.data.cooldownList[this.data.effect];
+                        let timeSinceCooldownStarted = currentTime - cooldownStart;
+                        if (isNaN(timeSinceCooldownStarted) || timeSinceCooldownStarted > this.data.cooldownTime) {
+                            this.data.cooldownList[this.data.effect] = currentTime;
+                            if (this.data.effect == "pull") {
+                                this.moveMonstersToTarget(target, enemyIds);
+                            } else if (this.data.effect == "push") {
+                                this.blastMonstersAwayFromTarget(player, target, enemyIds);
+                            }
+                            this.dealDamage(player, target, enemyIds);
+                        } else {
+                            console.log(this.data.effect + " gun still recharging")
                         }
-                        this.dealDamage(player, target, enemyIds);
                     } else {
-                        console.log(this.data.effect + " gun still recharging")
+                        this.dealDamage(player, target, enemyIds);
 					}
                 },
 
@@ -462,7 +466,7 @@
                         var elPosition = el.getAttribute('position');
                         if (el != null && targetPosition != null && elPosition != null) {
                             let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x)) + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
-                            console.log("distance " + d2target);
+                            //console.log("distance " + d2target);
                             if (Math.abs(d2target) <= distance) {
                                 nearbyMonsters.push(el);
                             }
