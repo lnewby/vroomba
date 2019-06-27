@@ -12,7 +12,7 @@
             var position = new THREE.Vector3();
             var prevPosition = new THREE.Vector3();
             var imageStream = null;
-            var bufferSize = 15;
+            var bufferSize = 30;
             var bufferPt = 0;
             var imageArray = [];
 
@@ -38,9 +38,12 @@
                     .then( (result) => {
                         //console.log('success:', result);
                         let j = JSON.parse(result[1]).data;
-                        position = j.position;
-                        imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
-                        if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                        if (j.type == 2) {
+                            imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+                            if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                        } else {
+                            position = j.position;
+                        }
                     })
                     .catch(error => console.log('error:', error));
                 setTimeout("worker ()", 60);
@@ -521,6 +524,8 @@
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
             </a-assets>
 
+            <a-sky color="black"></a-sky>
+
             <a-entity sound="src: #s-theme"></a-entity>
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
@@ -533,7 +538,14 @@
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
-				<a-image backdrop src="models/vroomba_icon.png" width="20.56" height="10.24" position="0 1 -5"></a-image>
+                
+                <!-- Camera image -->
+				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -5"></a-image>
+
+                <!-- Monitor -->
+                <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 0.836" rotation="0 -45 0"></a-entity>
+
+                <!-- Vehicle structure -->
                 <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="-1.5 0 1.955" rotation="0 0 0"></a-entity>
                 <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="1.5 0 1.897" rotation="0 180 0"></a-entity>
 				<a-entity id="right-wall" geometry="primitive: box; height: 3; width: 0.1" material="color: grey" rotation="0 27.5 0" position="2 1.5 0"></a-entity>
@@ -541,10 +553,7 @@
                 <a-entity id="floor" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 0 2"></a-entity>
                 <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 1.99"></a-entity>
                 <a-entity id="back-wall" geometry="primitive: box; height: 3; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.393 4.965"></a-entity>
-                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #a8ccd7; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
-
-                <!-- Weapon switch -->
-                <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 0.836" rotation="0 -45 0"></a-entity>
+                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
 
                 <!-- Interior decor -->
                 <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 3.592" rotation="0 90 0"></a-entity>
