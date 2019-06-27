@@ -59,7 +59,7 @@
                 monster.setAttribute('id', monster_id);
                 monster.setAttribute('class', 'collidable');
                 monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
-                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 1.5});
+                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 2.5});
                 monster.setAttribute('visible', true);
                 //console.log('Monster ID: MM_' + monster_id);
 

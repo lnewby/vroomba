@@ -301,6 +301,7 @@
                             sceneEl.emit('weaponChanged', {effect: "normal"});
                         }
                     };
+
                 }
             });
 
@@ -499,7 +500,28 @@
 
         </script>
 
-		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+		<a-scene id="scene" physics vroomba-scene-setup>
+            <a-assets>
+                <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
+                <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
+                <a-asset-item id="wooden-box-mtl" src="models/wooden boxes pack.mtl"></a-asset-item>
+                <a-asset-item id="panel-obj" src="models/objPanel.obj"></a-asset-item>
+                <a-asset-item id="panel-mtl" src="models/objPanel.mtl"></a-asset-item>
+                <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
+                <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
+                <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
+
+                <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
+                <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
+                <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+
+                <a-image id="rustic-floor" src="models/rustic_floor.png"></a-image>
+                <a-image id="door" src="models/space_door.jpg"></a-image>
+                
+                <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+            </a-assets>
+
+            <a-entity sound="src: #s-theme"></a-entity>
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
             
@@ -511,12 +533,25 @@
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
-				<a-image backdrop src="" width="20.56" height="10.24" position="0 1 -5"></a-image>
-				<a-entity id="right-wall" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 27.5 0" position="0.8 1 0"></a-entity>
-				<a-entity id="left-wall" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 151 0" position="-0.8 1 0"></a-entity>
-                <a-entity id="ceiling" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 0 90" position="0 2 0"></a-entity>
-                <a-entity id="floor" geometry="primitive: box; height: 2; width: 0.1" material="color: grey" rotation="0 0 90" position="0 0 0"></a-entity>
-                <a-entity id="front-wall" geometry="primitive: box; height: 1; width: 0.1; depth: 1.5" material="color: #607d8b" rotation="0 90 0" position="0 0.5 -0.5"></a-entity>
+				<a-image backdrop src="models/vroomba_icon.png" width="20.56" height="10.24" position="0 1 -5"></a-image>
+                <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="-1.5 0 1.955" rotation="0 0 0"></a-entity>
+                <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="1.5 0 1.897" rotation="0 180 0"></a-entity>
+				<a-entity id="right-wall" geometry="primitive: box; height: 3; width: 0.1" material="color: grey" rotation="0 27.5 0" position="2 1.5 0"></a-entity>
+				<a-entity id="left-wall" geometry="primitive: box; height: 3; width: 0.1" material="color: grey" rotation="0 152.5 0" position="-2 1.5 0"></a-entity>
+                <a-entity id="floor" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 0 2"></a-entity>
+                <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 1.99"></a-entity>
+                <a-entity id="back-wall" geometry="primitive: box; height: 3; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.393 4.965"></a-entity>
+                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #a8ccd7; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
+
+                <!-- Weapon switch -->
+                <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 0.836" rotation="0 -45 0"></a-entity>
+
+                <!-- Interior decor -->
+                <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 3.592" rotation="0 90 0"></a-entity>
+                <a-entity obj-model="obj: #panel-obj; mtl: #panel-mtl" scale="0.3 0.3 0.3" position="-1.489 0.211 3.040" rotation="0 0 0"></a-entity>
+                <a-entity obj-model="obj: #TV1-obj" material="src: #TV1-mat" scale="0.11 0.11 0.11" position="1.088 0.607 2.616" rotation="0 -130 0"></a-entity>
+                <a-entity obj-model="obj: #bunny-obj" material="src: #bunny-mat" scale="0.005 0.005 0.005" position="1.188 0.264 2.049" rotation="0 -115 0"></a-entity>
+
 			</a-entity>
 
 			<a-entity world position="0 0 0">
@@ -534,10 +569,6 @@
                 </a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
-            <a-assets>
-                <a-asset-item id="object" src="models/scene.gltf"></a-asset-item>
-            </a-assets>
-            <a-entity gltf-model="#object" scale="2 2 2" rotation="0 -180 0" position="0 0 -3"></a-entity>
 
 		</a-scene>
 
@@ -552,22 +583,22 @@
             let pullButton = document.createElement('a-entity');
             pullButton.setAttribute('id', 'pull');
             pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            pullButton.setAttribute('position', {x: -0.046, y:0.55, z:0.371});
+            pullButton.setAttribute('position', {x: -0.046, y:0.15, z:0.371});
             pullButton.setAttribute('material', {color: 'purple'});
             let pushButton = document.createElement('a-entity');
             pushButton.setAttribute('id', 'push');
             pushButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            pushButton.setAttribute('position', {x: -0.069, y:0.39, z:0.371});
+            pushButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
             pushButton.setAttribute('material', {color: 'orange'});
             let areaButton = document.createElement('a-entity');
             areaButton.setAttribute('id', 'areaOfEffect');
             areaButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            areaButton.setAttribute('position', {x: -0.041, y:0.55, z:-0.371});
+            areaButton.setAttribute('position', {x: -0.041, y:0.15, z:-0.371});
             areaButton.setAttribute('material', {color: 'red'});
             let sniperButton = document.createElement('a-entity');
             sniperButton.setAttribute('id', 'sniper');
             sniperButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            sniperButton.setAttribute('position', {x: -0.041, y:0.39, z:-0.371});
+            sniperButton.setAttribute('position', {x: -0.041, y:0.05, z:-0.371});
             sniperButton.setAttribute('material', {color: 'blue'});
             leftWall.appendChild(pullButton);
             leftWall.appendChild(pushButton);
@@ -589,6 +620,7 @@
             gun.appendChild(levelLabel);
             // Add camera to rig to scene
             cam.appendChild(gun);
+
 		</script>
 	</body>
 </html>
