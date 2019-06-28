@@ -212,6 +212,20 @@
                 },
 
                 handlers: {
+                    gameStarted: function(state, action){
+                        //var monsterComponent = document.querySelector('#monster1');
+                        var spawner1 = document.querySelector('#spawner1').components.spawner;
+                        var spawner2 = document.querySelector('#spawner2').components.spawner;
+                        spawner1.gameStarted();
+                        spawner2.gameStarted();
+                    },
+                    nextLevel: function(state, action){
+                        var spawner1 = document.querySelector('#spawner1').components.spawner;
+                        var spawner2 = document.querySelector('#spawner2').components.spawner;
+                        spawner1.resetNumMonsters();
+                        spawner2.resetNumMonsters();
+                        AFRAME.scenes[0].systems.hud.updateLevel(state.currentLevel);
+                    },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
                         state.enemyIds.push(enemyId);
@@ -252,7 +266,7 @@
                             let levelObj = state.levelMap[state.currentLevel];
                             if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
                                 state.currentLevel += 1;
-                                AFRAME.scenes[0].systems.hudUpdate.updateLevel(state.currentLevel);
+                                AFRAME.scenes[0].emit('nextLevel');
                             }
                         }
                     },
@@ -286,33 +300,42 @@
                     const sceneEl = document.querySelector('a-scene');
 
                     window.onkeyup = function(e) {
-                        if (e.key == 1){
-                            sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
-                        } else if (e.key == 2){
+                        if (e.key == 1) {
+                            //sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
+                            sceneEl.emit('nextLevel');
+                        } else if (e.key == 2) {
                             sceneEl.emit('enemyDefeated', {});
-                        } else if (e.key == 3){
+                        } else if (e.key == 3) {
                             sceneEl.emit('playerHit', {damage: 5});
-                        } else if (e.key == 4){
+                        } else if (e.key == 4) {
                             sceneEl.emit('weaponChanged', {effect: "pull"});
-                        } else if (e.key == 5){
+                        } else if (e.key == 5) {
                             sceneEl.emit('weaponChanged', {effect: "push"});
-                        } else if (e.key == 6){
+                        } else if (e.key == 6) {
                             sceneEl.emit('weaponChanged', {effect: "areaOfEffect"});
-                        } else if (e.key == 7){
+                        } else if (e.key == 7) {
                             sceneEl.emit('weaponChanged', {effect: "sniper"});
-                        } else if (e.key == 8){
+                        } else if (e.key == 8) {
                             sceneEl.emit('weaponChanged', {effect: "normal"});
+                        } else if (e.key == 9) {
+                            sceneEl.emit('gameStarted');
                         }
                     };
 
                 }
             });
 
-            AFRAME.registerSystem('hudUpdate', {
+            AFRAME.registerSystem('hud', {
 
-                updateLevel: function(level){
-                    document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + level});
-                }
+                updateGun: function(){},
+
+                updatePlayerHealth: function(){},
+
+                updateMonstersDefeated: function(){},
+
+                updateLevel: function(currentLevel){
+                    document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + currentLevel});
+                },
 
             });
 
