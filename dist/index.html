@@ -229,6 +229,10 @@
                             if (entityId == "pull" || entityId == "push" || entityId == "areaOfEffect" || entityId == "sniper"){
                                 AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
                             }
+
+                            if (entityId == "start"){
+                                AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
+                            }
                             return;
                         }
                         let enemyId = entityId;
@@ -594,6 +598,13 @@
             pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
             pullButton.setAttribute('position', {x: -0.046, y:0.15, z:0.371});
             pullButton.setAttribute('material', {color: 'purple'});
+
+            let startButton = document.createElement('a-entity');
+            startButton.setAttribute('id', 'start');
+            startButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            startButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
+            startButton.setAttribute('material', {color: 'yellow'});
+
             let pushButton = document.createElement('a-entity');
             pushButton.setAttribute('id', 'push');
             pushButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
