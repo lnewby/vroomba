@@ -182,6 +182,8 @@
                 }
             });
 
+        
+
             AFRAME.registerComponent('vive-trigger', {
                 init: function () {
                     this.el.addEventListener('triggerdown', (e) => {
@@ -251,22 +253,45 @@
                         }
                     },
                     playerHit: function(state, action){
+                        //var damage = 0;
                         let damage = action.damage;
                         state.playerHealth -= damage;
+                        var sceneEl = document.querySelector('a-scene');
+                        let sceneEl2 = document.querySelector('a-sky');
+                        //console.log("im here"+sceneEl2.getAttribute('animation'));
+                        sceneEl2.emit('myHurt');
+                        sceneEl2.addEventListener('animationcomplete', function(e){
+                            console.log("hello");
+                            sceneEl2.setAttribute('animation__2',{
+                                property: 'components.material.material.color',
+                                type: 'color',
+                                from: 'red',
+                                to: 'white', 
+                                dur:1000,
+                                loop: true 
+                            })
+                        })
                         if (state.playerHealth < 0){
                             // TODO: player dead, game over
                         }
                     },
                     weaponChanged: function(state, action){
                         AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
-                    }
+                    },
+                    // hurt: function(state, action){
+                    //     var sceneEl2 = document.querySelector('#sky');
+                    //     console.log("hurt");
+                    //     sceneEl2.setAttribute
+                    // }
                 }
             });
+
 
             AFRAME.registerComponent('vroomba-scene-setup', {
                 init() {
                     // Attach objects to global scene
                     const sceneEl = document.querySelector('a-scene');
+                    //const sceneEl2 = document.querySelector('a-sky');
 
                     window.onkeyup = function(e) {
                         if (e.key == 1){
@@ -275,6 +300,7 @@
                             sceneEl.emit('enemyDefeated', {});
                         } else if (e.key == 3){
                             sceneEl.emit('playerHit', {damage: 5});
+                           // sceneEl2.emit('myHurt');
                         } else if (e.key == 4){
                             sceneEl.emit('weaponChanged', {effect: "pull"});
                         } else if (e.key == 5){
@@ -437,18 +463,24 @@
                 }
             });
 
+        
+
         </script>
 
-		<a-scene id="scene" physics fog="color: #00f; near: 0; far: 10;" vroomba-scene-setup>
+		<a-scene id="scene" physics  vroomba-scene-setup>
 
 
-            <a-assets>
+            <!-- <a-assets>
                 <a-asset-item id="cockpit-obj" src="./scene.gltf"></a-asset-item>
             </a-assets>
 
-            <a-entity gltf-model="#cockpit-obj"></a-entity>
+            <a-entity gltf-model="#cockpit-obj"></a-entity> -->
+            <a-sky id="mySky" color="#FFF" opacity="0.2" 
+            animation="property:components.material.material.color; type: color; from: white; to: red; dur:1000; startEvents:myHurt; repeat:1;" 
+            >
+            </a-sky>
 
-
+            
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0 0 "></a-entity>
 
@@ -461,7 +493,9 @@
 				</a-entity>
 				<a-image backdrop src="" width="3.2" height="2.4" position="0 1.6 -2"></a-image>
 				<a-entity id="right-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 27.5 0" position="0.8 0 0"></a-entity>
-				<a-entity id="left-wall" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 0 0"></a-entity>
+				<a-entity id="left-wall" material="color:red" geometry="primitive: box; height: 0.5; width: 0.1" rotation="0 151 0" position="-0.8 0 0">
+                            
+                </a-entity>
 			</a-entity>
 
 			<a-entity world position="0 0 0">
