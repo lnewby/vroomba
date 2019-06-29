@@ -6,8 +6,8 @@
             monsterType: {type: 'string'},
             health: {type: 'number', default: 50},
             maxHealth: {type: 'number'},
-            healthBarWidth: {type: 'number', default: 0.2},
-            healthBarHeight: {type: 'number', default: 0.02},
+            healthBarWidth: {type: 'number', default: 0.7},
+            healthBarHeight: {type: 'number', default: 0.06},
             damageRate: {type: 'number', default: 100},
             damagePt: {type: 'number', default: 10}
         },
@@ -34,7 +34,7 @@
             //     align: 'center',
             //     color: 'pink'
             // });
-            healthBar.setAttribute('position', {x: 0, y: 0.27, z: 0});
+            healthBar.setAttribute('position', {x: 0, y: 0.727, z: 0});
         }
 
     });
@@ -59,7 +59,7 @@
                 monster.setAttribute('id', monster_id);
                 monster.setAttribute('class', 'collidable');
                 monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
-                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 0.5});
+                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 2.5});
                 monster.setAttribute('visible', true);
                 //console.log('Monster ID: MM_' + monster_id);
 
@@ -91,7 +91,7 @@
                     //el.querySelector('a-entity[text]').setAttribute('text', {value: 0});
                     //console.log("Monster: died");
                     this.unregisterMonster(el);
-                    this.el.sceneEl.emit('enemyDefeated');
+                    this.el.sceneEl.emit('enemyDefeated', {enemyId: el.id});
                 }
             }
 
@@ -112,6 +112,7 @@
         // Circular area where monsters should spawn
 
         schema: {
+            gameStarted: {type: 'boolean', default: false},
             spawnRadius: {type: 'number', default: 1},
             spawnPoolSize: {type: 'number', default: 5},
             spawnRate: {type: 'number', default: 300},
@@ -126,6 +127,14 @@
             this.spawnPosition = this.el.object3D.position;
             this.registerSpawningZone();
             console.log(this.spawnPosition);
+        },
+
+        gameStarted: function() {
+            this.data.gameStarted = true;
+        },
+
+        resetNumMonsters: function(){
+            this.monsterCounter = 0;
         },
 
         registerSpawningZone: function() {
@@ -165,15 +174,15 @@
             //console.log(this.monsterPosition);
         },
 
-        spawn: function (e) {
+        spawn: function () {
 
-            if (this.monsterCounter < this.data.spawnPoolSize) {
+            if (this.data.gameStarted && (this.monsterCounter < this.data.spawnPoolSize)) {
 
                 this.monsterCounter++;
                 //console.group("Monster: spawning monster " + this.data.monster.getAttribute('monster').monsterType + " " + this.monsterCounter + "/" + this.data.spawnPoolSize);
 
                 this.spawningCoordinates(this.data.spawnRadius);
-                e.sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
+                sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
 
                 //console.log("Spawn position: " + JSON.stringify(this.monsterPosition));
                 //console.groupEnd();
@@ -188,7 +197,7 @@
         schema: {
             target: {type: 'selector'},
             speed: {type: 'number'},
-            space: {type: 'number', default: 0.5},
+            space: {type: 'number', default: 1},
         },
 
         init: function () {
