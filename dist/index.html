@@ -277,6 +277,21 @@
                     playerHit: function(state, action){
                         let damage = action.damage;
                         state.playerHealth -= damage;
+                        var sceneEl = document.querySelector('a-scene');
+                        let sceneEl2 = document.querySelector('a-sky');
+                        console.log("im here"+sceneEl2.getAttribute('animation'));
+                        sceneEl2.emit('myHurt');
+                        sceneEl2.addEventListener('animationcomplete', function(e){
+                            //console.log("hello");
+                            sceneEl2.setAttribute('animation__2',{
+                                property: 'components.material.material.color',
+                                type: 'color',
+                                from: 'red',
+                                to: 'black', 
+                                dur:1000,
+                                repeat:1 
+                            });
+                        });
                         if (state.playerHealth < 0){
                             // TODO: player dead, game over
                         }
@@ -553,7 +568,8 @@
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
             </a-assets>
 
-            <a-sky color="black"></a-sky>
+            <a-sky color="black" opacity="0.2" 
+            animation="property:components.material.material.color; type: color; from: black; to: red; dur:1000; startEvents:myHurt; repeat:1;" ></a-sky>
 
             <a-entity sound="src: #s-theme"></a-entity>
 

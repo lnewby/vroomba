@@ -218,8 +218,8 @@
             if (distance < bufferZone) {
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
                     console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
-                    var tdamage='5';
-                    this.el.sceneEl.emit('playerHit', {damage: tdamage});
+                    
+                    this.el.sceneEl.emit('playerHit', {damage: 5});
                     
 
                     this.playerDamageTracker = 0;
