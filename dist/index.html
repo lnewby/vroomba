@@ -31,25 +31,25 @@
 
 
             //Fetch data from Redis
-            var url="http://localhost:8080/getredisdata";
+            // var url="http://localhost:8080/getredisdata";
 
-            function worker () {
-                fetch(url).then(response => response.json())
-                    .then( (result) => {
-                        //console.log('success:', result);
-                        let j = JSON.parse(result[1]).data;
-                        if (j.type == 2) {
-                            imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
-                            if (bufferPt++ > bufferSize) { bufferPt = 0; }
-                        } else {
-                            position = j.position;
-                        }
-                    })
-                    .catch(error => console.log('error:', error));
-                setTimeout("worker ()", 11);
-            }
+            // function worker () {
+            //     fetch(url).then(response => response.json())
+            //         .then( (result) => {
+            //             //console.log('success:', result);
+            //             let j = JSON.parse(result[1]).data;
+            //             if (j.type == 2) {
+            //                 imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+            //                 if (bufferPt++ > bufferSize) { bufferPt = 0; }
+            //             } else {
+            //                 position = j.position;
+            //             }
+            //         })
+            //         .catch(error => console.log('error:', error));
+            //     setTimeout("worker ()", 11);
+            // }
 
-            worker ();
+            // worker ();
 
 
             AFRAME.registerComponent('vehicle', {
@@ -148,7 +148,7 @@
             AFRAME.registerComponent('world', {
 
                 init: function () {
-                    this.xmitter = document.querySelector('#pos-transmit');
+                    //this.xmitter = document.querySelector('#pos-transmit');
                     this.player = document.querySelector('#player');
 
                     this.playerDebug = document.querySelector('#player-debug');
@@ -163,7 +163,7 @@
                     
                     if (newPosition != null) {
 
-                        this.xmitter.setAttribute('position', newPosition);
+                        //this.xmitter.setAttribute('position', newPosition);
 
                         var currentPosition = this.el.getAttribute('position');
                         var playerCurrent = this.player.getAttribute('position');
@@ -278,20 +278,8 @@
                         let damage = action.damage;
                         state.playerHealth -= damage;
                         var sceneEl = document.querySelector('a-scene');
-                        let sceneEl2 = document.querySelector('a-sky');
-                        console.log("im here"+sceneEl2.getAttribute('animation'));
+                        let sceneEl2 = document.querySelector('#glass-panel');
                         sceneEl2.emit('myHurt');
-                        sceneEl2.addEventListener('animationcomplete', function(e){
-                            //console.log("hello");
-                            sceneEl2.setAttribute('animation__2',{
-                                property: 'components.material.material.color',
-                                type: 'color',
-                                from: 'red',
-                                to: 'black', 
-                                dur:1000,
-                                repeat:1 
-                            });
-                        });
                         if (state.playerHealth < 0){
                             // TODO: player dead, game over
                         }
@@ -568,8 +556,7 @@
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
             </a-assets>
 
-            <a-sky color="black" opacity="0.2" 
-            animation="property:components.material.material.color; type: color; from: black; to: red; dur:1000; startEvents:myHurt; repeat:1;" ></a-sky>
+            <a-sky color="black" ></a-sky>
 
             <a-entity sound="src: #s-theme"></a-entity>
 
@@ -599,7 +586,8 @@
                 <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 0.99"></a-entity>
                 <a-entity id="back-wall" geometry="primitive: box; height: 2.838; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.450 3.609"></a-entity>
 
-                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 3.5; depth: 0.01" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 0 0" position="0 1.393 -1.234">
+                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 3.5; depth: 0.01" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 0 0" position="0 1.393 -1.234"
+                animation="property:components.material.material.color; type: color; from: red; to: #74adbf; dur:666; startEvents:myHurt;">
 
                     <a-image src="#screen" height="2.3" width="2.3"></a-image>
 
