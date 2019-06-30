@@ -558,6 +558,8 @@
                 <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 1.99"></a-entity>
                 <a-entity id="back-wall" geometry="primitive: box; height: 3; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.393 4.965"></a-entity>
                 <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
+                <a-entity id="start" text="value: Start Game; align: center; visible: true; transparent: false" geometry="primitive: plane; height: 1; width: 1; transparent: trues;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+
 
                 <!-- Interior decor -->
                 <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 3.592" rotation="0 90 0"></a-entity>
@@ -588,22 +590,18 @@
 		<script type="text/javascript">
             // The scene
             let sceneEl = document.querySelector('a-scene');
+            let backdrop = document.querySelector('a-image');
             let cam = document.querySelector('a-entity[camera]');
             let vehicle = document.querySelector('a-entity[vehicle]');
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
+            let frontWall = document.querySelector('#start');
             //setup vehicle
             let pullButton = document.createElement('a-entity');
             pullButton.setAttribute('id', 'pull');
             pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
             pullButton.setAttribute('position', {x: -0.046, y:0.15, z:0.371});
             pullButton.setAttribute('material', {color: 'purple'});
-
-            let startButton = document.createElement('a-entity');
-            startButton.setAttribute('id', 'start');
-            startButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            startButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
-            startButton.setAttribute('material', {color: 'yellow'});
 
             let pushButton = document.createElement('a-entity');
             pushButton.setAttribute('id', 'push');
@@ -640,7 +638,6 @@
             gun.appendChild(levelLabel);
             // Add camera to rig to scene
             cam.appendChild(gun);
-
 		</script>
 	</body>
 </html>
