@@ -112,6 +112,7 @@
         // Circular area where monsters should spawn
 
         schema: {
+            gameStarted: {type: 'boolean', default: false},
             spawnRadius: {type: 'number', default: 1},
             spawnPoolSize: {type: 'number', default: 5},
             spawnRate: {type: 'number', default: 300},
@@ -126,6 +127,14 @@
             this.spawnPosition = this.el.object3D.position;
             this.registerSpawningZone();
             console.log(this.spawnPosition);
+        },
+
+        gameStarted: function() {
+            this.data.gameStarted = true;
+        },
+
+        resetNumMonsters: function(){
+            this.monsterCounter = 0;
         },
 
         registerSpawningZone: function() {
@@ -165,15 +174,15 @@
             //console.log(this.monsterPosition);
         },
 
-        spawn: function (e) {
+        spawn: function () {
 
-            if (this.monsterCounter < this.data.spawnPoolSize) {
+            if (this.data.gameStarted && (this.monsterCounter < this.data.spawnPoolSize)) {
 
                 this.monsterCounter++;
                 //console.group("Monster: spawning monster " + this.data.monster.getAttribute('monster').monsterType + " " + this.monsterCounter + "/" + this.data.spawnPoolSize);
 
                 this.spawningCoordinates(this.data.spawnRadius);
-                e.sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
+                sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
 
                 //console.log("Spawn position: " + JSON.stringify(this.monsterPosition));
                 //console.groupEnd();
@@ -204,17 +213,20 @@
             var currentPosition = this.el.object3D.position;
             directionVec3.copy(targetPosition).sub(currentPosition);
             var distance = directionVec3.length();
-
+          
             // Monster hit damage player
             if (distance < bufferZone) {
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
-                    //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
+                    console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
+                    
+                    this.el.sceneEl.emit('playerHit', {damage: 5});
+                    
+
                     this.playerDamageTracker = 0;
                 }
                 else {
                     this.playerDamageTracker++;
                 }
-
                 return;
             }
 
