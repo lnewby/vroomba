@@ -558,7 +558,7 @@
                 <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 1.99"></a-entity>
                 <a-entity id="back-wall" geometry="primitive: box; height: 3; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.393 4.965"></a-entity>
                 <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
-                <a-entity id="start" text="value: Start Game; align: center; visible: true; transparent: false" geometry="primitive: plane; height: 1; width: 1; transparent: trues;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+                <a-entity id="start" text="value: Start Game; color: blue; align: center; visible: true; transparent: false" geometry="primitive: plane; height: 1; width: 1; transparent: trues;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
 
 
                 <!-- Interior decor -->
@@ -595,7 +595,7 @@
             let vehicle = document.querySelector('a-entity[vehicle]');
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
-            let frontWall = document.querySelector('#start');
+            let startGame = document.querySelector('#start');
             //setup vehicle
             let pullButton = document.createElement('a-entity');
             pullButton.setAttribute('id', 'pull');
