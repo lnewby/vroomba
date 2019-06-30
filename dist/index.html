@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	    <script src="./lib/aframe.min.js"></script>
-		<script src="./lib/aframe-state-component.min.js"></script>
-		<script src="./lib/aframe-monster-system.js"></script>
-		<!-- <script src="./socket.io/socket.io.js"></script> -->
+        <script src="lib/aframe.min.js"></script>
+        <script scr="lib/aframe-extras.min.js"></script>
+		<script src="lib/aframe-state-component.min.js"></script>
+		<script src="lib/aframe-monster-system.js"></script>
+        <!-- <script src="./socket.io/socket.io.js"></script> -->
 	</head>
 	<body>
         
@@ -193,7 +194,7 @@
                     currentLevel: 1,
                     endLevel: 3,
                     enemyIds: [],
-					defeatedEnemyIds: [],
+		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     levelMap: {
                         1: {
@@ -531,10 +532,46 @@
                 }
             });
 
+            /* global AFRAME, THREE */
+
+            /**
+            * Player for animation clips. Intended to be compatible with any model format that supports
+            * skeletal or morph animations.
+            */
+            AFRAME.registerComponent('play-all-model-animations', {
+                init: function () {
+                    this.model = null;
+                    this.mixer = null;
+
+                    var model = this.el.getObject3D('mesh');
+                    if (model) {
+                        this.load(model);
+                    } else {
+                        this.el.addEventListener('model-loaded', function (e) {
+                            this.load(e.detail.model);
+                        }.bind(this));
+                    }
+                },
+
+                load: function (model) {
+                    this.model = model;
+                    this.mixer = new THREE.AnimationMixer(model);
+                    if (this.model.animations) {
+                        for (let animation of this.model.animations) {
+                            this.mixer.clipAction(animation, model).play();
+                        }
+                    }
+                },
+
+                tick: function (t, dt) {
+                    if (this.mixer && !isNaN(dt)) {
+                        this.mixer.update(dt / 1000);
+                    }
+                }
+            });
         </script>
 
 		<a-scene id="scene" physics vroomba-scene-setup>
-        <!-- fog="color: #000; near: 5; far: 10;" -->
             <a-assets>
                 <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
@@ -544,10 +581,16 @@
                 <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
                 <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
+                <a-asset-item id="weapon-obj" src="models/Railgun_Prototype-Wavefront OBJ.obj"></a-asset-item>
+                <a-asset-item id="zombieBunny" src="models/zombunny/scene.gltf"></a-asset-item>
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
                 <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
                 <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+                <a-image id="weapon-green-mat" src="models/rail-gun-green.jpg"></a-image>
+                <a-image id="weapon-blue-mat" src="models/rail-gun-blue.jpg"></a-image>
+                <a-image id="weapon-red-mat" src="models/rail-gun-red.jpg"></a-image>
+                <a-image id="weapon-gold-mat" src="models/rail-gun-gold.jpg"></a-image>
 
                 <a-image id="rustic-floor" src="models/rustic_floor.png"></a-image>
                 <a-image id="door" src="models/space_door.jpg"></a-image>
@@ -562,8 +605,10 @@
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
             
+            <!-- Vive controller weapon -->
             <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
             <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <a-entity obj-model="obj: #weapon-obj" material="src: #weapon-green-mat" position="-0.169 1.268 0"></a-entity>
             
 			<a-entity vehicle position="0 0 0" rotation="0 90 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
@@ -617,16 +662,10 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, 0"></a-entity>
-                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.6" material="color: teal" position="0 0.6 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.15 color="#000000" position="0.3 0.2 0.4" kinematic-body></a-sphere>
-                    <a-sphere radius=0.15 color="#000000" position="-0.3 0.2 0.4" kinematic-body></a-sphere>
-                </a-entity>
+                <a-entity monster="monsterType: teal; health: 100" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="-3, 0.0001, 4"></a-entity>
-                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.45" material="color: red" position="0 0.45 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.15 color="#000000" position="0.2 0 0.3" kinematic-body></a-sphere>
-                    <a-sphere radius=0.15 color="#000000" position="-0.2 0 0.3" kinematic-body></a-sphere>
-                </a-entity>
+                <a-entity monster="monsterType: red" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
 
