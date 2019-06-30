@@ -556,10 +556,15 @@
                 <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
                 <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
+                <a-asset-item id="weapon-obj" src="models/Railgun_Prototype-Wavefront OBJ.obj"></a-asset-item>
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
                 <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
                 <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+                <a-image id="weapon-green-mat" src="models/rail-gun-green.jpg"></a-image>
+                <a-image id="weapon-blue-mat" src="models/rail-gun-blue.jpg"></a-image>
+                <a-image id="weapon-red-mat" src="models/rail-gun-red.jpg"></a-image>
+                <a-image id="weapon-gold-mat" src="models/rail-gun-gold.jpg"></a-image>
 
                 <a-image id="rustic-floor" src="models/rustic_floor.png"></a-image>
                 <a-image id="door" src="models/space_door.jpg"></a-image>
@@ -575,8 +580,10 @@
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
             
+            <!-- Vive controller weapon -->
             <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
             <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <a-entity obj-model="obj: #weapon-obj" material="src: #weapon-green-mat" position="-0.169 1.268 0"></a-entity>
             
 			<a-entity vehicle position="0 0 0" rotation="0 90 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
