@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <script src="./lib/aframe.min.js"></script>
+		<script src="./lib/aframe-state-component.min.js"></script>
+		<script src="./lib/aframe-monster-system.js"></script>
+		<!-- <script src="./socket.io/socket.io.js"></script> -->
+	</head>
+	<body>
+        
+        <script type="text/javascript">
+            var position = new THREE.Vector3();
+            var prevPosition = new THREE.Vector3();
+            var imageStream = null;
+            var bufferSize = 30;
+            var bufferPt = 0;
+            var imageArray = [];
+
+//            var socket = io.connect('http://192.168.1.10:3000');
+//
+//            socket.on('position', function (data) {
+//                console.log(data);
+//                position = data;
+//            });
+//
+//            socket.on('camera', function (data) {
+//                //console.log(data);
+//                imageArray[bufferPt] = "data:image/jpeg;base64," + JSON.parse(data).img;
+//                if (bufferPt++ > bufferSize) { bufferPt = 0; }
+//            });
+
+
+            //Fetch data from Redis
+            var url="http://localhost:8080/getredisdata";
+
+            function worker () {
+                fetch(url).then(response => response.json())
+                    .then( (result) => {
+                        //console.log('success:', result);
+                        let j = JSON.parse(result[1]).data;
+                        if (j.type == 2) {
+                            imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+                            if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                        } else {
+                            position = j.position;
+                        }
+                    })
+                    .catch(error => console.log('error:', error));
+                setTimeout("worker ()", 60);
+            }
+
+            worker ();
+
+
+            AFRAME.registerComponent('vehicle', {
+                schema: {
+                    isVisiblePos: {type: 'boolean', default: true}
+                },
+
+                init: function () {
+                    //this.player = document.querySelector('#player');
+
+                    this.playerDebug = document.querySelector('#player-debug');
+                    this.playerDebug.setAttribute('visible', this.data.isVisiblePos);
+                }
+            });
+
+            //Stream images to screen
+            AFRAME.registerComponent('backdrop', {
+                tick: function () {
+                    if (imageArray[bufferPt])
+                       this.el.setAttribute('src', imageArray[bufferPt]);
+                }
+            });
+
+            //Simulate cam data with arrow key
+            AFRAME.registerComponent('xmitter', {
+/*
+                init: function () {
+                    
+                    var offset = 0.1;
+                    
+                    document.addEventListener('keydown', (e) => {
+
+                        var currentPosition = this.el.getAttribute('position');
+
+                        //console.log(e.code);
+                        switch (e.keyCode) {
+                        case 38:
+                            // Up
+                            position = {x: currentPosition.x, y: 0.2, z: currentPosition.z - offset};
+                            break;
+                        case 40:
+                            // Down
+                            position = {x: currentPosition.x, y: 0.2, z: currentPosition.z + offset};
+                            break;
+                        case 37:
+                            // Left
+                            position = {x: currentPosition.x - offset, y: 0.2, z: currentPosition.z};
+                            break;
+                        case 39:
+                            // Right
+                            position = {x: currentPosition.x + offset, y: 0.2, z: currentPosition.z};
+                            break;
+                        }
+
+                        this.el.setAttribute('position', position);
+
+                    });
+                },
+*/
+/*
+                tick: function () {
+
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (this.responseText) {
+                                let result = JSON.parse(JSON.parse(this.responseText)[1]).data;
+                                let img = result.img;
+                                position = result.position;
+
+                                imageArray[bufferPt] = "data:image/jpeg;base64," + img;
+                                if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                            }
+                        }
+                    };
+                    xhttp.open("GET", "getredisdata", true);
+                    xhttp.send();
+
+                    var setPos = position === undefined ? null : position;
+                    if (setPos != null) {
+                        var newPos = {x: setPos.x, y: 1.6, z: setPos.z}
+                        this.el.setAttribute('position', {x: setPos.x, y: 0, z: setPos.z});
+                        this.player.setAttribute('position', newPos)
+                        //console.log(setPos);
+                    }
+
+                    if (this.data.isVisiblePos) {
+                        //this.playerDebug.setAttribute('text', {value: JSON.stringify(newPos)});
+                        this.playerDebug.setAttribute('text', {value: JSON.stringify(position)});
+                    }
+                }
+*/
+
+            });
+
+            AFRAME.registerComponent('world', {
+
+                init: function () {
+                    this.xmitter = document.querySelector('#pos-transmit');
+                    this.player = document.querySelector('#player');
+
+                    this.playerDebug = document.querySelector('#player-debug');
+                    this.directionVec3 = new THREE.Vector3();
+                    this.playerDirectionVec3 = new THREE.Vector3();
+
+                },
+
+                tick: function (time, timeDelta) {
+
+                    var newPosition = position === undefined ? null : position;
+                    
+                    if (newPosition != null) {
+
+                        this.xmitter.setAttribute('position', newPosition);
+
+                        var currentPosition = this.el.getAttribute('position');
+                        var playerCurrent = this.player.getAttribute('position');
+                        this.directionVec3.copy(newPosition).sub(prevPosition);
+                        this.el.setAttribute('position', {x: currentPosition.x - this.directionVec3.x, y: 0.2, z: currentPosition.z - this.directionVec3.z});
+                        this.player.setAttribute('position', {x: playerCurrent.x + this.directionVec3.x, y: 0.2, z: playerCurrent.z + this.directionVec3.z});
+                    }
+                    prevPosition = position;
+                }
+            });
+
+            AFRAME.registerComponent('cursor-selector', {
+                init: function () {
+                    this.el.addEventListener('click', (e) => {
+                        var target = e.detail.intersection.object.el;
+                        console.log("Cursor: selected " + target.id);
+                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                    });
+                }
+            });
+
+            AFRAME.registerState({
+                initialState: {
+                    playerHealth: 50,
+                    numEnemiesInLevel: 10,
+                    totalEnemiesDefeated: 0,
+                    currentLevel: 1,
+                    endLevel: 3,
+                    enemyIds: [],
+					defeatedEnemyIds: [],
+                    enemiesRayHitIds: [],
+                    levelMap: {
+                        1: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 2,
+                        },
+                        2: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 3,
+                        },
+                        3: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 4,
+                        },
+                    }
+                },
+
+                handlers: {
+                    enemyCreated: function(state, action){
+                        let enemyId = action.enemyId;
+                        state.enemyIds.push(enemyId);
+                    },
+                    enemyHit: function(state, action) {
+                        for (let id of state.enemiesRayHitIds) {
+                            AFRAME.scenes[0].emit('entityHit', {entityId: id});
+                        }
+                    },
+                    entityHit: function(state, action){
+                        let systems = AFRAME.scenes[0].systems;
+                        let entityId = action.entityId;
+                        if (entityId == null || !entityId.startsWith("MM_")){
+                            //TODO: handle non-enemy hit (weapon switched)
+                            if (entityId == "pull" || entityId == "push" || entityId == "areaOfEffect" || entityId == "sniper"){
+                                AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
+                            }
+
+                            if (entityId == "start"){
+                                AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
+                            }
+                            return;
+                        }
+                        let enemyId = entityId;
+                        let enemyEl = document.querySelector('#' + enemyId);
+                        let player = document.querySelector('#player');
+                        if (enemyEl) {
+                            systems.weapon.doEffect(player, enemyEl, state.enemyIds);
+                        }
+                    },
+                    enemyDefeated: function(state, action){
+                        let enemyId = action.enemyId;
+                        if (state.enemyIds.includes(enemyId)){
+                            state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+                                return value != enemyId;
+                            });
+						}
+						state.defeatedEnemyIds.push(enemyId);
+                        state.enemiesDefeated += 1;
+                        if (!(state.currentLevel > state.endLevel)) {
+                            state.levelMap[state.currentLevel].enemiesDefeated += 1;
+                            let levelObj = state.levelMap[state.currentLevel];
+                            if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
+                                state.currentLevel += 1;
+                                AFRAME.scenes[0].systems.hudUpdate.updateLevel(state.currentLevel);
+                            }
+                        }
+                    },
+                    playerHit: function(state, action){
+                        let damage = action.damage;
+                        state.playerHealth -= damage;
+                        if (state.playerHealth < 0){
+                            // TODO: player dead, game over
+                        }
+                    },
+                    weaponChanged: function(state, action){
+                        AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
+                    },
+                    addEnemiesRayHit: function(state, action){
+                        let id = action.id;
+                        state.enemiesRayHitIds.push(id);
+                    },
+                    removeEnemiesRayHit: function(state, action){
+                        let ids = action.ids;
+
+                        for (let id of ids) {
+                            state.enemiesRayHitIds.pop(id);    
+                        } 
+                    },
+                }
+            });
+
+            AFRAME.registerComponent('vroomba-scene-setup', {
+                init() {
+                    // Attach objects to global scene
+                    const sceneEl = document.querySelector('a-scene');
+
+                    window.onkeyup = function(e) {
+                        if (e.key == 1){
+                            sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
+                        } else if (e.key == 2){
+                            sceneEl.emit('enemyDefeated', {});
+                        } else if (e.key == 3){
+                            sceneEl.emit('playerHit', {damage: 5});
+                        } else if (e.key == 4){
+                            sceneEl.emit('weaponChanged', {effect: "pull"});
+                        } else if (e.key == 5){
+                            sceneEl.emit('weaponChanged', {effect: "push"});
+                        } else if (e.key == 6){
+                            sceneEl.emit('weaponChanged', {effect: "areaOfEffect"});
+                        } else if (e.key == 7){
+                            sceneEl.emit('weaponChanged', {effect: "sniper"});
+                        } else if (e.key == 8){
+                            sceneEl.emit('weaponChanged', {effect: "normal"});
+                        }
+                    };
+
+                }
+            });
+
+            AFRAME.registerSystem('hudUpdate', {
+
+                updateLevel: function(level){
+                    document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + level});
+                }
+
+            });
+
+            AFRAME.registerSystem('weapon', {
+                schema: {
+                    effect: { type: 'string', default: 'normal'},
+                    damage: { type: 'number', default: 10},
+					cooldownTime: { type: 'number', default: 5000}, //5 sec
+					cooldownList: { type: 'array', default: []}
+                },
+
+                init: function () {
+
+                },
+
+                tick: function () {
+                },
+
+                weaponChanged: function ( weaponEffect ) {
+                    this.data.effect = weaponEffect;
+
+                    let weapon = document.querySelector('#weapon');
+                    console.log(weapon);
+                    if (weaponEffect == "pull"){
+                        weapon.setAttribute('material', {color: 'purple'});
+                    } else if (weaponEffect == "push") {
+                        weapon.setAttribute('material', {color: 'orange'});
+                    } else if (weaponEffect == "areaOfEffect"){
+                        weapon.setAttribute('material', {color: 'red'});
+                    } else if (weaponEffect == "sniper"){
+                        weapon.setAttribute('material', {color: 'blue'});
+                    } else if (weaponEffect == "normal"){
+                        weapon.setAttribute('material', {color: 'grey'});
+                    }
+                },
+
+                getDamage: function() {
+                    return this.data.damage;
+                },
+
+                doEffect: function (player, target, enemyIds) {
+                    if (this.data.effect == "pull" || this.data.effect == "push") {
+                        let currentTime = new Date().getTime();
+                        let cooldownStart = this.data.cooldownList[this.data.effect];
+                        let timeSinceCooldownStarted = currentTime - cooldownStart;
+                        if (isNaN(timeSinceCooldownStarted) || timeSinceCooldownStarted > this.data.cooldownTime) {
+                            this.data.cooldownList[this.data.effect] = currentTime;
+                            if (this.data.effect == "pull") {
+                                this.moveMonstersToTarget(target, enemyIds);
+                            } else if (this.data.effect == "push") {
+                                this.blastMonstersAwayFromTarget(player, target, enemyIds);
+                            }
+                            this.dealDamage(player, target, enemyIds);
+                        } else {
+                            console.log(this.data.effect + " gun still recharging")
+                        }
+                    } else {
+                        this.dealDamage(player, target, enemyIds);
+					}
+                },
+
+                dealDamage: function(player, target, enemyIds){
+                    if (this.data.effect == "normal") {
+                        this.el.sceneEl.systems.monster.onHit(target, this.data.damage);
+                    } else if (this.data.effect == "areaOfEffect"){
+                        let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 2);
+                        for (let i = 0; i < nearbyEnemies.length; i++){
+                            let enemy = nearbyEnemies[i];
+                            this.el.sceneEl.systems.monster.onHit(enemy, this.data.damage/2);
+                        }
+                        this.el.sceneEl.systems.monster.onHit(target, this.data.damage);
+                    } else if (this.data.effect == "sniper"){
+                        let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 1);
+                        console.log(nearbyEnemies);
+                        if (nearbyEnemies.length == 0){
+                            this.el.sceneEl.systems.monster.onHit(target, this.data.damage*2);
+                        } else {
+                            this.el.sceneEl.systems.monster.onHit(target, this.data.damage/2);
+                        }
+                    }
+                },
+
+                moveMonstersToTarget: function( target, monsterIds ){
+                    let targetPosition = target.getAttribute('position');
+                    console.log(targetPosition);
+                    for (let i = 0; i < monsterIds.length; i++){
+                        var id = monsterIds[i];
+                        if (id == target.id){
+                            continue;
+                        }
+                        var el = document.querySelector('#' + id);
+                        if (el != null) {
+                            var newPos = {
+                                x: targetPosition.x + ((Math.random() * 0.8) + -0.8),
+                                y: targetPosition.y,
+                                z: targetPosition.z + ((Math.random() * 0.8) + -0.8),
+                            };
+                            el.setAttribute('animation', 'property: position; to: ' + newPos.x + " " + newPos.y  + " " + newPos.z);
+                        }
+                    }
+                },
+
+                blastMonstersAwayFromTarget: function( player, target, monsterIds ){
+                    let playerPosition = player.getAttribute('position');
+                    let targetPosition = target.getAttribute('position');
+                    for (let i = 0; i < monsterIds.length; i++){
+                        var id = monsterIds[i];
+                        if (id == player.id){
+                            continue;
+                        }
+                        var el = document.querySelector('#' + id); //monster
+                        var elPosition = el.getAttribute('position');
+                        if (el != null) {
+                            //distance from player to current iterated monster
+                            let d = Math.sqrt(((playerPosition.x - elPosition.x)*(playerPosition.x - elPosition.x))
+                                + ((playerPosition.z - elPosition.z)*(playerPosition.z - elPosition.z)));
+                            //distance from the monster hit to the current iterated monster
+                            let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x))
+                                + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
+                            //console.log("d: " + d.toFixed(2));
+                            if (Math.abs(d2target) < 3) {
+                                //**Change targetPosition to to playerPosition in the next 2 lines to make
+								//the monsters move directly away from player instead of away from the monster who was hit
+								//**Change the (d+#) to any value to modify the distance that the monsters are pushed away
+                                let newX = targetPosition.x - (((d + 5) * (targetPosition.x - elPosition.x)) / d);
+                                let newZ = targetPosition.z - (((d + 5) * (targetPosition.z - elPosition.z)) / d);
+                                //this part is to move the hit-monster directly away from the player
+                                if (d2target == 0){
+									newX = playerPosition.x - (((d + 5) * (playerPosition.x - elPosition.x)) / d);
+                                    newZ = playerPosition.z - (((d + 5) * (playerPosition.z - elPosition.z)) / d);
+                                }
+                                var newPos = {
+                                    x: newX,
+                                    y: elPosition.y,
+                                    z: newZ,
+                                };
+                                el.setAttribute('animation', 'property: position; to: ' + newPos.x + " " + newPos.y  + " " + newPos.z + "; dur: 500");
+                            }
+                        }
+                    }
+                },
+
+                getMonstersWithinDistanceOfTarget( target, monsterIds, distance){
+                    let targetPosition = target.getAttribute('position');
+                    let nearbyMonsters = [];
+                    for (let i = 0; i < monsterIds.length; i++) {
+                        var id = monsterIds[i];
+                        if (id == target.id) {
+                            continue;
+                        }
+                        var el = document.querySelector('#' + id);
+                        if (el == null){
+                            continue;
+                        }
+                        var elPosition = el.getAttribute('position');
+                        if (el != null && targetPosition != null && elPosition != null) {
+                            let d2target = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x)) + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
+                            //console.log("distance " + d2target);
+                            if (Math.abs(d2target) <= distance) {
+                                nearbyMonsters.push(el);
+                            }
+                        }
+                    }
+                    return nearbyMonsters;
+                }
+            });
+
+            AFRAME.registerComponent('collider-check', {
+                dependencies: ['raycaster'],
+
+                init: function () {
+                    const sceneEl = document.querySelector('a-scene');
+                    // Use events to figure out what raycaster is listening so we don't have to
+                    // hardcode the raycaster.
+                    this.el.addEventListener('raycaster-intersection', evt => {
+                        this.enemyId = evt.detail.els[0].id;
+                        sceneEl.emit('addEnemiesRayHit', {id: this.enemyId});
+                    });
+                    this.el.addEventListener('raycaster-intersection-cleared', evt => {
+                        this.enemyIds = evt.detail.clearedEls.map(el => el.id);
+                        sceneEl.emit('removeEnemiesRayHit', {ids: this.enemyIds});
+                    });
+                    this.el.addEventListener('triggerdown', () => {
+                        sceneEl.emit('enemyHit', {});
+                    });
+                }
+            });
+
+        </script>
+
+		<a-scene id="scene" physics vroomba-scene-setup>
+            <a-assets>
+                <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
+                <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
+                <a-asset-item id="wooden-box-mtl" src="models/wooden boxes pack.mtl"></a-asset-item>
+                <a-asset-item id="panel-obj" src="models/objPanel.obj"></a-asset-item>
+                <a-asset-item id="panel-mtl" src="models/objPanel.mtl"></a-asset-item>
+                <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
+                <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
+                <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
+
+                <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
+                <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
+                <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+
+                <a-image id="rustic-floor" src="models/rustic_floor.png"></a-image>
+                <a-image id="door" src="models/space_door.jpg"></a-image>
+                
+                <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+            </a-assets>
+
+            <a-sky color="black"></a-sky>
+
+            <a-entity sound="src: #s-theme"></a-entity>
+
+			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
+            
+            <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            
+			<a-entity vehicle position="0 0 0">
+				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
+					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
+					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
+				</a-entity>
+                
+                <!-- Camera image -->
+				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -5"></a-image>
+
+                <!-- Monitor -->
+                <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 0.836" rotation="0 -45 0"></a-entity>
+
+                <!-- Vehicle structure -->
+                <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="-1.5 0 1.955" rotation="0 0 0"></a-entity>
+                <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="1.5 0 1.897" rotation="0 180 0"></a-entity>
+				<a-entity id="right-wall" geometry="primitive: box; height: 3; width: 0.1" material="color: grey" rotation="0 27.5 0" position="2 1.5 0"></a-entity>
+				<a-entity id="left-wall" geometry="primitive: box; height: 3; width: 0.1" material="color: grey" rotation="0 152.5 0" position="-2 1.5 0"></a-entity>
+                <a-entity id="floor" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 0 2"></a-entity>
+                <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 1.99"></a-entity>
+                <a-entity id="back-wall" geometry="primitive: box; height: 3; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.393 4.965"></a-entity>
+                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 0.01; depth: 3.5" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 90 0" position="0 1.393 -0.334"></a-entity>
+
+                <!-- Interior decor -->
+                <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 3.592" rotation="0 90 0"></a-entity>
+                <a-entity obj-model="obj: #panel-obj; mtl: #panel-mtl" scale="0.3 0.3 0.3" position="-1.489 0.211 3.040" rotation="0 0 0"></a-entity>
+                <a-entity obj-model="obj: #TV1-obj" material="src: #TV1-mat" scale="0.11 0.11 0.11" position="1.088 0.607 2.616" rotation="0 -130 0"></a-entity>
+                <a-entity obj-model="obj: #bunny-obj" material="src: #bunny-mat" scale="0.005 0.005 0.005" position="1.188 0.264 2.049" rotation="0 -115 0"></a-entity>
+
+			</a-entity>
+
+			<a-entity world position="0 0 0">
+                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="0, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.6" material="color: teal" position="0 0.6 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.15 color="#000000" position="0.3 0.2 0.4" kinematic-body></a-sphere>
+                    <a-sphere radius=0.15 color="#000000" position="-0.3 0.2 0.4" kinematic-body></a-sphere>
+                </a-entity>
+
+                <a-entity spawner="monster: #monster2" id="spawner2" position="4, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.45" material="color: red" position="0 0.45 -3" visible="false" monster-prefab>
+                    <a-sphere radius=0.15 color="#000000" position="0.2 0 0.3" kinematic-body></a-sphere>
+                    <a-sphere radius=0.15 color="#000000" position="-0.2 0 0.3" kinematic-body></a-sphere>
+                </a-entity>
+                <a-entity monsters></a-entity>
+            </a-entity>
+
+		</a-scene>
+
+		<script type="text/javascript">
+            // The scene
+            let sceneEl = document.querySelector('a-scene');
+            let cam = document.querySelector('a-entity[camera]');
+            let vehicle = document.querySelector('a-entity[vehicle]');
+            let leftWall = document.querySelector('#left-wall');
+            let rightWall = document.querySelector('#right-wall');
+            //setup vehicle
+            let pullButton = document.createElement('a-entity');
+            pullButton.setAttribute('id', 'pull');
+            pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            pullButton.setAttribute('position', {x: -0.046, y:0.15, z:0.371});
+            pullButton.setAttribute('material', {color: 'purple'});
+
+            let startButton = document.createElement('a-entity');
+            startButton.setAttribute('id', 'start');
+            startButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            startButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
+            startButton.setAttribute('material', {color: 'yellow'});
+
+            let pushButton = document.createElement('a-entity');
+            pushButton.setAttribute('id', 'push');
+            pushButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            pushButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
+            pushButton.setAttribute('material', {color: 'orange'});
+            let areaButton = document.createElement('a-entity');
+            areaButton.setAttribute('id', 'areaOfEffect');
+            areaButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            areaButton.setAttribute('position', {x: -0.041, y:0.15, z:-0.371});
+            areaButton.setAttribute('material', {color: 'red'});
+            let sniperButton = document.createElement('a-entity');
+            sniperButton.setAttribute('id', 'sniper');
+            sniperButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
+            sniperButton.setAttribute('position', {x: -0.041, y:0.05, z:-0.371});
+            sniperButton.setAttribute('material', {color: 'blue'});
+            leftWall.appendChild(pullButton);
+            leftWall.appendChild(pushButton);
+            rightWall.appendChild(areaButton);
+            rightWall.appendChild(sniperButton);
+            //Create HUD
+            var gun = document.createElement('a-entity');
+            gun.setAttribute('id', 'weapon');
+            gun.setAttribute('geometry', {primitive: 'box', height: 0.06, width: 0.035, depth: 0.21});
+            gun.setAttribute('position', {x: -0.05, y: -0.05, z: -0.11});
+            gun.setAttribute('material', {color: 'darkgrey', opacity: 1});
+            gun.setAttribute('rotation', {x: 3.0, y: -10.0, z: -16.0});
+            var levelLabel = document.createElement('a-entity');
+            levelLabel.setAttribute('id', 'levelLabel');
+            levelLabel.setAttribute('position', {x:0.004, y:0.033, z:-0.193});
+            levelLabel.setAttribute('rotation', {x:-89.41, y:-20.54, z:109.39});
+            levelLabel.setAttribute('scale', {x:0.5, y:0.5, z:0.5});
+            levelLabel.setAttribute('text', {value: 'Level 1', color: 'white'});
+            gun.appendChild(levelLabel);
+            // Add camera to rig to scene
+            cam.appendChild(gun);
+
+		</script>
+	</body>
+</html>

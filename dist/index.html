@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	    <script src="./lib/aframe.min.js"></script>
-		<script src="./lib/aframe-state-component.min.js"></script>
-		<script src="./lib/aframe-monster-system.js"></script>
-		<!-- <script src="./socket.io/socket.io.js"></script> -->
+        <script src="lib/aframe.min.js"></script>
+        <script scr="lib/aframe-extras.min.js"></script>
+		<script src="lib/aframe-state-component.min.js"></script>
+		<script src="lib/aframe-monster-system.js"></script>
+        <!-- <script src="./socket.io/socket.io.js"></script> -->
 	</head>
 	<body>
-        
+
         <script type="text/javascript">
             var position = new THREE.Vector3();
             var prevPosition = new THREE.Vector3();
@@ -31,25 +32,25 @@
 
 
             //Fetch data from Redis
-            var url="http://localhost:8080/getredisdata";
+            // var url="http://localhost:8080/getredisdata";
 
-            function worker () {
-                fetch(url).then(response => response.json())
-                    .then( (result) => {
-                        //console.log('success:', result);
-                        let j = JSON.parse(result[1]).data;
-                        if (j.type == 2) {
-                            imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
-                            if (bufferPt++ > bufferSize) { bufferPt = 0; }
-                        } else {
-                            position = j.position;
-                        }
-                    })
-                    .catch(error => console.log('error:', error));
-                setTimeout("worker ()", 11);
-            }
+            // function worker () {
+            //     fetch(url).then(response => response.json())
+            //         .then( (result) => {
+            //             //console.log('success:', result);
+            //             let j = JSON.parse(result[1]).data;
+            //             if (j.type == 2) {
+            //                 imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+            //                 if (bufferPt++ > bufferSize) { bufferPt = 0; }
+            //             } else {
+            //                 position = j.position;
+            //             }
+            //         })
+            //         .catch(error => console.log('error:', error));
+            //     setTimeout("worker ()", 11);
+            // }
 
-            worker ();
+            // worker ();
 
 
             AFRAME.registerComponent('vehicle', {
@@ -77,9 +78,9 @@
             AFRAME.registerComponent('xmitter', {
 /*
                 init: function () {
-                    
+
                     var offset = 0.1;
-                    
+
                     document.addEventListener('keydown', (e) => {
 
                         var currentPosition = this.el.getAttribute('position');
@@ -148,7 +149,7 @@
             AFRAME.registerComponent('world', {
 
                 init: function () {
-                    this.xmitter = document.querySelector('#pos-transmit');
+                    //this.xmitter = document.querySelector('#pos-transmit');
                     this.player = document.querySelector('#player');
 
                     this.playerDebug = document.querySelector('#player-debug');
@@ -160,10 +161,10 @@
                 tick: function (time, timeDelta) {
 
                     var newPosition = position === undefined ? null : position;
-                    
+
                     if (newPosition != null) {
 
-                        this.xmitter.setAttribute('position', newPosition);
+                        //this.xmitter.setAttribute('position', newPosition);
 
                         var currentPosition = this.el.getAttribute('position');
                         var playerCurrent = this.player.getAttribute('position');
@@ -196,7 +197,7 @@
                     enemiesDefeated: 0,
                     enemiesAlive: 0,
                     enemyIds: [],
-					defeatedEnemyIds: [],
+		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     endLevel: 3,
                     levelMap: {
@@ -264,6 +265,10 @@
                             }
 
                             if (entityId == "start"){
+                                console.log("start game");
+                                let startGame = document.querySelector("#start");
+                                startGame.parentNode.removeChild(startGame);
+
                                 AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
                             }
                             return;
@@ -299,6 +304,9 @@
                     playerHit: function(state, action){
                         let damage = action.damage;
                         state.playerHealth -= damage;
+                        var sceneEl = document.querySelector('a-scene');
+                        let sceneEl2 = document.querySelector('#glass-panel');
+                        sceneEl2.emit('myHurt');
                         if (state.playerHealth < 0){
                             // TODO: player dead, game over
                         }
@@ -315,8 +323,8 @@
                         let ids = action.ids;
 
                         for (let id of ids) {
-                            state.enemiesRayHitIds.pop(id);    
-                        } 
+                            state.enemiesRayHitIds.pop(id);
+                        }
                     },
                     updateMessage: function(state, action){
                        state.message = action.message;
@@ -596,10 +604,46 @@
                 }
             });
 
+            /* global AFRAME, THREE */
+
+            /**
+            * Player for animation clips. Intended to be compatible with any model format that supports
+            * skeletal or morph animations.
+            */
+            AFRAME.registerComponent('play-all-model-animations', {
+                init: function () {
+                    this.model = null;
+                    this.mixer = null;
+
+                    var model = this.el.getObject3D('mesh');
+                    if (model) {
+                        this.load(model);
+                    } else {
+                        this.el.addEventListener('model-loaded', function (e) {
+                            this.load(e.detail.model);
+                        }.bind(this));
+                    }
+                },
+
+                load: function (model) {
+                    this.model = model;
+                    this.mixer = new THREE.AnimationMixer(model);
+                    if (this.model.animations) {
+                        for (let animation of this.model.animations) {
+                            this.mixer.clipAction(animation, model).play();
+                        }
+                    }
+                },
+
+                tick: function (t, dt) {
+                    if (this.mixer && !isNaN(dt)) {
+                        this.mixer.update(dt / 1000);
+                    }
+                }
+            });
         </script>
 
 		<a-scene id="scene" physics vroomba-scene-setup>
-        <!-- fog="color: #000; near: 5; far: 10;" -->
             <a-assets>
                 <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
@@ -609,33 +653,41 @@
                 <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
                 <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
+                <a-asset-item id="weapon-obj" src="models/Railgun_Prototype-Wavefront OBJ.obj"></a-asset-item>
+                <a-asset-item id="zombieBunny" src="models/zombunny/scene.gltf"></a-asset-item>
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
                 <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
                 <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+                <a-image id="weapon-green-mat" src="models/rail-gun-green.jpg"></a-image>
+                <a-image id="weapon-blue-mat" src="models/rail-gun-blue.jpg"></a-image>
+                <a-image id="weapon-red-mat" src="models/rail-gun-red.jpg"></a-image>
+                <a-image id="weapon-gold-mat" src="models/rail-gun-gold.jpg"></a-image>
 
                 <a-image id="rustic-floor" src="models/rustic_floor.png"></a-image>
                 <a-image id="door" src="models/space_door.jpg"></a-image>
                 <a-image id="screen" src="models/screen.png"></a-image>
-                
+
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
             </a-assets>
 
-            <a-sky color="black"></a-sky>
+            <a-sky color="black" ></a-sky>
 
             <a-entity sound="src: #s-theme"></a-entity>
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
-            
+
+            <!-- Vive controller weapon -->
             <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
             <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            
+            <a-entity obj-model="obj: #weapon-obj" material="src: #weapon-green-mat" position="-0.169 1.268 0"></a-entity>
+
 			<a-entity vehicle position="0 0 0" rotation="0 90 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
-                
+
                 <!-- Camera image -->
 				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
 
@@ -651,7 +703,8 @@
                 <a-entity id="ceiling" geometry="primitive: box; height: 4; width: 0.1; depth: 5" material="src: #rustic-floor" rotation="0 0 90" position="0 2.837 0.99"></a-entity>
                 <a-entity id="back-wall" geometry="primitive: box; height: 2.838; width: 0.1; depth: 3.5" material="src: #door" rotation="0 90 0" position="0 1.450 3.609"></a-entity>
 
-                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 3.5; depth: 0.01" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 0 0" position="0 1.393 -1.234">
+                <a-entity id="glass-panel" geometry="primitive: box; height: 3; width: 3.5; depth: 0.01" material="color: #74adbf; opacity: 0.2; transparent: true" rotation="0 0 0" position="0 1.393 -1.234"
+                animation="property:components.material.material.color; type: color; from: red; to: #74adbf; dur:666; startEvents:myHurt;">
 
                     <a-image src="#screen" height="2.3" width="2.3"></a-image>
 
@@ -670,6 +723,9 @@
 
                 </a-entity>
 
+                <a-entity id="start" text="value: Start Game; align: center; visible: true; transparent: false" geometry="primitive: plane; height: 1; width: 1; transparent: trues;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+
+
                 <!-- Interior decor -->
                 <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 2.204" rotation="0 90 0"></a-entity>
                 <a-entity obj-model="obj: #panel-obj; mtl: #panel-mtl" scale="0.3 0.3 0.3" position="-1.489 0.211 2.120" rotation="0 0 0"></a-entity>
@@ -681,16 +737,10 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, 0"></a-entity>
-                <a-entity monster="monsterType: teal; health: 100" id="monster1" geometry="primitive: sphere; radius: 0.6" material="color: teal" position="0 0.6 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.15 color="#000000" position="0.3 0.2 0.4" kinematic-body></a-sphere>
-                    <a-sphere radius=0.15 color="#000000" position="-0.3 0.2 0.4" kinematic-body></a-sphere>
-                </a-entity>
+                <a-entity monster="monsterType: teal; health: 100" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="-3, 0.0001, 4"></a-entity>
-                <a-entity monster="monsterType: red" id="monster2" geometry="primitive: sphere; radius: 0.45" material="color: red" position="0 0.45 -3" visible="false" monster-prefab>
-                    <a-sphere radius=0.15 color="#000000" position="0.2 0 0.3" kinematic-body></a-sphere>
-                    <a-sphere radius=0.15 color="#000000" position="-0.2 0 0.3" kinematic-body></a-sphere>
-                </a-entity>
+                <a-entity monster="monsterType: red" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
 
@@ -699,22 +749,18 @@
 		<script type="text/javascript">
             // The scene
             let sceneEl = document.querySelector('a-scene');
+            let backdrop = document.querySelector('a-image');
             let cam = document.querySelector('a-entity[camera]');
             let vehicle = document.querySelector('a-entity[vehicle]');
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
+            let startGame = document.querySelector('#start');
             //setup vehicle
             let pullButton = document.createElement('a-entity');
             pullButton.setAttribute('id', 'pull');
             pullButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
             pullButton.setAttribute('position', {x: -0.046, y:0.15, z:0.371});
             pullButton.setAttribute('material', {color: 'purple'});
-
-            let startButton = document.createElement('a-entity');
-            startButton.setAttribute('id', 'start');
-            startButton.setAttribute('geometry', {primitive: 'sphere', radius: '0.05'});
-            startButton.setAttribute('position', {x: -0.069, y:0.05, z:0.371});
-            startButton.setAttribute('material', {color: 'yellow'});
 
             let pushButton = document.createElement('a-entity');
             pushButton.setAttribute('id', 'push');
@@ -751,7 +797,6 @@
             gun.appendChild(levelLabel);
             // Add camera to rig to scene
             cam.appendChild(gun);
-
 		</script>
 	</body>
 </html>
