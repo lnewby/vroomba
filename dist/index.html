@@ -246,6 +246,10 @@
                             }
 
                             if (entityId == "start"){
+                                console.log("start game");
+                                let startGame = document.querySelector("#start");
+                                startGame.parentNode.removeChild(startGame);
+
                                 AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
                             }
                             return;
