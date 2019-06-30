@@ -180,21 +180,25 @@
                     this.el.addEventListener('click', (e) => {
                         var target = e.detail.intersection.object.el;
                         console.log("Cursor: selected " + target.id);
-                        this.el.sceneEl.emit('entityHit', {entityId: target.id});
+                        this.el.sceneEl.emit('weaponFired', {entityId: target.id});
                     });
                 }
             });
 
             AFRAME.registerState({
                 initialState: {
-                    playerHealth: 50,
-                    numEnemiesInLevel: 10,
-                    totalEnemiesDefeated: 0,
+                    playerHealth: "50",
+                    message: "Awaiting new message...",
                     currentLevel: 1,
-                    endLevel: 3,
+                    pushWeaponCooldownText: "PUSH CD: ",
+                    pullWeaponCooldownText: "PULL CD: ",
+                    numEnemiesInLevel: 10,
+                    enemiesDefeated: 0,
+                    enemiesAlive: 0,
                     enemyIds: [],
 					defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
+                    endLevel: 3,
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
@@ -218,21 +222,36 @@
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
                         spawner1.gameStarted();
                         spawner2.gameStarted();
+                        state.message = "GAME STARTED!";
                     },
                     nextLevel: function(state, action){
                         var spawner1 = document.querySelector('#spawner1').components.spawner;
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
                         spawner1.resetNumMonsters();
                         spawner2.resetNumMonsters();
-                        AFRAME.scenes[0].systems.hud.updateLevel(state.currentLevel);
+                        state.currentLevel++;
                     },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
                         state.enemyIds.push(enemyId);
                     },
-                    enemyHit: function(state, action) {
+                    weaponFired: function(state, action) {
                         for (let id of state.enemiesRayHitIds) {
                             AFRAME.scenes[0].emit('entityHit', {entityId: id});
+                        }
+                        //AFRAME.scenes[0].emit('entityHit', {entityId: action.entityId});
+                    },
+                    updateWeaponCooldown: function(state, action){
+                        let effect = action.effect;
+                        let timeLeft = action.timeLeft;
+                        let bars = "";
+                        for (let i = 0; i < timeLeft; i++){
+                            bars += "|";
+                        }
+                        if (effect == "push"){
+                            state.pushWeaponCooldownText = "PUSH CD: " + bars;
+                        } else if (effect == "pull"){
+                            state.pullWeaponCooldownText = "PULL CD: " + bars;
                         }
                     },
                     entityHit: function(state, action){
@@ -255,6 +274,7 @@
                         if (enemyEl) {
                             systems.weapon.doEffect(player, enemyEl, state.enemyIds);
                         }
+                        AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
                         let enemyId = action.enemyId;
@@ -265,6 +285,8 @@
 						}
 						state.defeatedEnemyIds.push(enemyId);
                         state.enemiesDefeated += 1;
+                        state.enemiesAlive = state.enemyIds.length;
+
                         if (!(state.currentLevel > state.endLevel)) {
                             state.levelMap[state.currentLevel].enemiesDefeated += 1;
                             let levelObj = state.levelMap[state.currentLevel];
@@ -283,6 +305,7 @@
                     },
                     weaponChanged: function(state, action){
                         AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
+                        state.currentWeaponEffect = action.effect;
                     },
                     addEnemiesRayHit: function(state, action){
                         let id = action.id;
@@ -295,6 +318,9 @@
                             state.enemiesRayHitIds.pop(id);    
                         } 
                     },
+                    updateMessage: function(state, action){
+                       state.message = action.message;
+                    }
                 }
             });
 
@@ -306,7 +332,7 @@
                     window.onkeyup = function(e) {
                         if (e.key == 1) {
                             //sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
-                            sceneEl.emit('nextLevel');
+                            sceneEl.emit('gameStarted');
                         } else if (e.key == 2) {
                             sceneEl.emit('enemyDefeated', {});
                         } else if (e.key == 3) {
@@ -316,108 +342,150 @@
                         } else if (e.key == 5) {
                             sceneEl.emit('weaponChanged', {effect: "push"});
                         } else if (e.key == 6) {
-                            sceneEl.emit('weaponChanged', {effect: "areaOfEffect"});
+                            sceneEl.emit('weaponChanged', {effect: "splash"});
                         } else if (e.key == 7) {
-                            sceneEl.emit('weaponChanged', {effect: "sniper"});
+                            sceneEl.emit('weaponChanged', {effect: "snipe"});
                         } else if (e.key == 8) {
                             sceneEl.emit('weaponChanged', {effect: "normal"});
                         } else if (e.key == 9) {
-                            sceneEl.emit('gameStarted');
+                            sceneEl.emit('updateMessage', {message: "TEST"});
                         }
                     };
 
                 }
             });
 
-            AFRAME.registerSystem('hud', {
-
-                updateGun: function(){},
-
-                updatePlayerHealth: function(){},
-
-                updateMonstersDefeated: function(){},
-
-                updateLevel: function(currentLevel){
-                    document.querySelector('#levelLabel').setAttribute('text', {value: "Level " + currentLevel});
-                },
-
-            });
-
             AFRAME.registerSystem('weapon', {
-                schema: {
-                    effect: { type: 'string', default: 'normal'},
-                    damage: { type: 'number', default: 10},
-					cooldownTime: { type: 'number', default: 5000}, //5 sec
-					cooldownList: { type: 'array', default: []}
-                },
+                schema: {},
 
                 init: function () {
-
+                    this.timer = 0;
+                    this.currentWeaponEffect = "normal";
+                    this.shouldCheckCooldowns = false;
+                    this.weaponInfo = {
+                        push: {
+                            effect: "push",
+                            cooldown: 5,
+                            damage: 5,
+                            countdown: 0,
+                            secondsTimer: 0
+                        },
+                        pull: {
+                            effect: "pull",
+                            cooldown: 5,
+                            damage: 2,
+                            countdown: 0,
+                            secondsTimer: 0
+                        },
+                        splash: {
+                            effect: "splash",
+                            cooldown: 0,
+                            damage: 5,
+                            countdown: 0,
+                            secondsTimer: 0
+                        },
+                        snipe: {
+                            effect: "snipe",
+                            cooldown: 0,
+                            damage: 10,
+                            countdown: 0,
+                            secondsTimer: 0
+                        },
+                        normal: {
+                            effect: "normal",
+                            cooldown: 0,
+                            damage: 8,
+                            countdown: 0,
+                            secondsTimer: 0
+                        }
+                    };
+                    this.weaponsWithCooldowns = [this.weaponInfo.push, this.weaponInfo.pull];
                 },
 
                 tick: function () {
+                    if (this.timer % 9 == 0) {
+                        let continueChecking = false;
+                        if (this.shouldCheckCooldowns) {
+                            for (let i = 0; i < this.weaponsWithCooldowns.length; i++){
+                                let weapon = this.weaponsWithCooldowns[i];
+                                if (weapon.countdown > 0) {
+                                    continueChecking = true;
+                                    weapon.secondsTimer += 0.1;
+                                    if (weapon.secondsTimer >= 1){
+                                        weapon.countdown--;
+                                        weapon.secondsTimer = 0;
+                                        sceneEl.emit("updateWeaponCooldown", {effect: weapon.effect, timeLeft: weapon.countdown});
+                                    }
+                                }
+                            }
+                            this.shouldCheckCooldowns = continueChecking;
+                        }
+                    }
+                    this.timer++;
                 },
 
-                weaponChanged: function ( weaponEffect ) {
-                    this.data.effect = weaponEffect;
+                isOnCooldown(weapon){
+                    let weaponObj = this.weaponInfo[weapon];
+                    if (weaponObj.countdown > 0){
+                        return true;
+                    }
+                    return false
+                },
 
-                    let weapon = document.querySelector('#weapon');
-                    console.log(weapon);
-                    if (weaponEffect == "pull"){
-                        weapon.setAttribute('material', {color: 'purple'});
-                    } else if (weaponEffect == "push") {
-                        weapon.setAttribute('material', {color: 'orange'});
-                    } else if (weaponEffect == "areaOfEffect"){
-                        weapon.setAttribute('material', {color: 'red'});
-                    } else if (weaponEffect == "sniper"){
-                        weapon.setAttribute('material', {color: 'blue'});
-                    } else if (weaponEffect == "normal"){
-                        weapon.setAttribute('material', {color: 'grey'});
+                hasCooldown(effect){
+                  if (effect == "push" || effect == "pull") {
+                      return true;
+                  }
+                  return false;
+                },
+
+                initiateCooldown: function(){
+                    if (this.isOnCooldown(this.currentWeaponEffect)) {
+                        console.log(this.currentWeaponEffect + " gun still recharging");
+                    }
+                    if (this.hasCooldown(this.currentWeaponEffect) && !this.isOnCooldown(this.currentWeaponEffect)) {
+                        this.weaponInfo[this.currentWeaponEffect].countdown = this.weaponInfo[this.currentWeaponEffect].cooldown;
+                        sceneEl.emit("updateWeaponCooldown", {
+                            effect: this.currentWeaponEffect,
+                            timeLeft: this.weaponInfo[this.currentWeaponEffect].cooldown
+                        });
+                        this.shouldCheckCooldowns = true;
                     }
                 },
 
-                getDamage: function() {
-                    return this.data.damage;
+                weaponChanged: function ( weaponEffect ) {
+                    this.currentWeaponEffect = weaponEffect;
                 },
 
                 doEffect: function (player, target, enemyIds) {
-                    if (this.data.effect == "pull" || this.data.effect == "push") {
-                        let currentTime = new Date().getTime();
-                        let cooldownStart = this.data.cooldownList[this.data.effect];
-                        let timeSinceCooldownStarted = currentTime - cooldownStart;
-                        if (isNaN(timeSinceCooldownStarted) || timeSinceCooldownStarted > this.data.cooldownTime) {
-                            this.data.cooldownList[this.data.effect] = currentTime;
-                            if (this.data.effect == "pull") {
-                                this.moveMonstersToTarget(target, enemyIds);
-                            } else if (this.data.effect == "push") {
-                                this.blastMonstersAwayFromTarget(player, target, enemyIds);
-                            }
-                            this.dealDamage(player, target, enemyIds);
-                        } else {
-                            console.log(this.data.effect + " gun still recharging")
+                    if (!this.isOnCooldown(this.currentWeaponEffect)) {
+                        if (this.currentWeaponEffect == "pull") {
+                            this.moveMonstersToTarget(target, enemyIds);
+                        } else if (this.currentWeaponEffect == "push") {
+                            this.blastMonstersAwayFromTarget(player, target, enemyIds);
                         }
-                    } else {
                         this.dealDamage(player, target, enemyIds);
-					}
+                    } else {
+                        console.log(this.currentWeaponEffect + " gun still recharging");
+                    }
                 },
 
                 dealDamage: function(player, target, enemyIds){
-                    if (this.data.effect == "normal") {
-                        this.el.sceneEl.systems.monster.onHit(target, this.data.damage);
-                    } else if (this.data.effect == "areaOfEffect"){
+                    let currentWeaponDamage = this.weaponInfo[this.currentWeaponEffect].damage;
+                    this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
+                    if (this.currentWeaponEffect == "splash"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 2);
                         for (let i = 0; i < nearbyEnemies.length; i++){
                             let enemy = nearbyEnemies[i];
-                            this.el.sceneEl.systems.monster.onHit(enemy, this.data.damage/2);
+                            this.el.sceneEl.systems.monster.onHit(enemy, currentWeaponDamage/2);
                         }
-                        this.el.sceneEl.systems.monster.onHit(target, this.data.damage);
-                    } else if (this.data.effect == "sniper"){
+                    } else if (this.currentWeaponEffect == "snipe"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 1);
-                        console.log(nearbyEnemies);
+                        //console.log(nearbyEnemies);
                         if (nearbyEnemies.length == 0){
-                            this.el.sceneEl.systems.monster.onHit(target, this.data.damage*2);
+                            this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage*2);
                         } else {
-                            this.el.sceneEl.systems.monster.onHit(target, this.data.damage/2);
+                            this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage/2);
                         }
                     }
                 },
@@ -463,13 +531,13 @@
                             if (Math.abs(d2target) < 3) {
                                 //**Change targetPosition to to playerPosition in the next 2 lines to make
 								//the monsters move directly away from player instead of away from the monster who was hit
-								//**Change the (d+#) to any value to modify the distance that the monsters are pushed away
-                                let newX = targetPosition.x - (((d + 5) * (targetPosition.x - elPosition.x)) / d);
-                                let newZ = targetPosition.z - (((d + 5) * (targetPosition.z - elPosition.z)) / d);
+								//**Change the (d*#) to any value to modify the distance that the monsters are pushed away
+                                let newX = targetPosition.x - (((d * 10) * (targetPosition.x - elPosition.x)) / d);
+                                let newZ = targetPosition.z - (((d * 10) * (targetPosition.z - elPosition.z)) / d);
                                 //this part is to move the hit-monster directly away from the player
                                 if (d2target == 0){
-									newX = playerPosition.x - (((d + 5) * (playerPosition.x - elPosition.x)) / d);
-                                    newZ = playerPosition.z - (((d + 5) * (playerPosition.z - elPosition.z)) / d);
+									newX = playerPosition.x - (((d * 10) * (playerPosition.x - elPosition.x)) / d);
+                                    newZ = playerPosition.z - (((d * 10) * (playerPosition.z - elPosition.z)) / d);
                                 }
                                 var newPos = {
                                     x: newX,
@@ -523,7 +591,7 @@
                         sceneEl.emit('removeEnemiesRayHit', {ids: this.enemyIds});
                     });
                     this.el.addEventListener('triggerdown', () => {
-                        sceneEl.emit('enemyHit', {});
+                        sceneEl.emit('weaponFired', {});
                     });
                 }
             });
@@ -588,16 +656,16 @@
                     <a-image src="#screen" height="2.3" width="2.3"></a-image>
 
                     <!-- Stat: health, level, enemies alive -->
-                    <a-entity id="stat-health" text="value: 23; width: 2.3; color: #33ffcc; align: center; opacity: 0.6; transparent: true" position="0.380 0.115 0"></a-entity>
-                    <a-entity id="stat-level" text="value: L01; width: 1.5; color: #33ffcc; align: center; opacity: 0.8; transparent: true" position="0 0.965 0"></a-entity>
-                    <a-entity id="stat-enemyalive" text="value: 30; width: 1.5; color: red; align: center; opacity: 0.8; transparent: true" position="0.943 0.123 0"></a-entity>
+                    <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
+                    <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
+                    <a-text id="stat-enemyalive" bind__value="value: 30" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
-                    <a-entity id="stat-cool-pull" text="value: pull ||||||; width: 1.5; color: #00fdff; opacity: 0.8; transparent: true" position="1.243 -0.745 0"></a-entity>
-                    <a-entity id="stat-cool-push" text="value: push  |||; width: 1.5; color: #00fdff; opacity: 0.8; transparent: true" position="1.243 -0.845 0"></a-entity>
+                    <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
+                    <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
-                    <a-plane width="1" height="0.5" material="color: #00fdff; opacity: 0.35; transparent: true" position="-0.8 0.682 0">
-                        <a-entity id="stat-msg" text="value: WARNING! Enemy Approaching!" material="color: #00fdff; opacity: 0.35; transparent: true" position="0.063 0.131 0"></a-entity>
+                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0" geometry="">
+                        <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.43336 0.16424 0.0076" width="0.8" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
