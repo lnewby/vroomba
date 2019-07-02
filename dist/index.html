@@ -262,24 +262,23 @@
                     entityHit: function(state, action){
                         let systems = AFRAME.scenes[0].systems;
                         let entityId = action.entityId;
-                        if (entityId == null || !entityId.startsWith("MM_")){
-                            if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe"){
-                                AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
-                            } else if (entityId == "start"){
-                                console.log("start game");
-                                let startGame = document.querySelector("#start");
-                                startGame.parentNode.removeChild(startGame);
+                        if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
+                            AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
+                        } else if (entityId == "start") {
+                            console.log("start game");
+                            let startGame = document.querySelector("#start");
+                            startGame.parentNode.removeChild(startGame);
 
-                                AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
-                            } else if (entityId.startsWith("MM_")){
-                                let enemyId = entityId;
-                                let enemyEl = document.querySelector('#' + enemyId);
-                                let player = document.querySelector('#player');
-                                if (enemyEl) {
-                                    systems.weapon.doEffect(player, enemyEl, state.enemyIds);
-                                }
+                            AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
+                        } else if (entityId.startsWith("MM_")) {
+                            let enemyId = entityId;
+                            let enemyEl = document.querySelector('#' + enemyId);
+                            let player = document.querySelector('#player');
+                            if (enemyEl) {
+                                systems.weapon.doEffect(player, enemyEl, state.enemyIds);
                             }
                         }
+
                         AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
