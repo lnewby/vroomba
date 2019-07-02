@@ -13,8 +13,9 @@
             var position = new THREE.Vector3();
             var prevPosition = new THREE.Vector3();
             var imageStream = null;
-            var bufferSize = 15;
+            var bufferSize = 90;
             var bufferPt = 0;
+            var currentImgPt = 0;
             var imageArray = [];
 
 //            var socket = io.connect('http://192.168.1.10:3000');
@@ -32,25 +33,25 @@
 
 
             //Fetch data from Redis
-            // var url="http://localhost:8080/getredisdata";
+            var url="http://localhost:8080/getredisdata";
 
-            // function worker () {
-            //     fetch(url).then(response => response.json())
-            //         .then( (result) => {
-            //             //console.log('success:', result);
-            //             let j = JSON.parse(result[1]).data;
-            //             if (j.type == 2) {
-            //                 imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
-            //                 if (bufferPt++ > bufferSize) { bufferPt = 0; }
-            //             } else {
-            //                 position = j.position;
-            //             }
-            //         })
-            //         .catch(error => console.log('error:', error));
-            //     setTimeout("worker ()", 11);
-            // }
+            function worker () {
+                fetch(url).then(response => response.json())
+                    .then( (result) => {
+                        //console.log('success:', result);
+                        let j = JSON.parse(result[1]).data;
+                        if (j.type == 2) {
+                            imageArray[bufferPt] = "data:image/jpeg;base64," + j.img;
+                            if (bufferPt++ > bufferSize) { bufferPt = 0; }
+                        } else {
+                            position = j.position;
+                        }
+                    })
+                    .catch(error => console.log('error:', error));
+                setTimeout("worker ()", 11);
+            }
 
-            // worker ();
+            worker ();
 
 
             AFRAME.registerComponent('vehicle', {
@@ -69,8 +70,11 @@
             //Stream images to screen
             AFRAME.registerComponent('backdrop', {
                 tick: function () {
-                    if (imageArray[bufferPt])
-                       this.el.setAttribute('src', imageArray[bufferPt]);
+                    if (imageArray[currentImgPt]) {
+                       this.el.setAttribute('src', imageArray[currentImgPt]);
+                       imageArray[currentImgPt] = ""
+                        if (currentImgPt++ > bufferSize) { currentImgPt = 0; }
+                    }
                 }
             });
 
@@ -149,7 +153,7 @@
             AFRAME.registerComponent('world', {
 
                 init: function () {
-                    //this.xmitter = document.querySelector('#pos-transmit');
+                    this.xmitter = document.querySelector('#pos-transmit');
                     this.player = document.querySelector('#player');
 
                     this.playerDebug = document.querySelector('#player-debug');
@@ -164,7 +168,7 @@
 
                     if (newPosition != null) {
 
-                        //this.xmitter.setAttribute('position', newPosition);
+                        this.xmitter.setAttribute('position', newPosition);
 
                         var currentPosition = this.el.getAttribute('position');
                         var playerCurrent = this.player.getAttribute('position');
@@ -642,13 +646,14 @@
         </script>
 
 		<a-scene id="scene" physics vroomba-scene-setup>
+        <!-- fog="color: #000; near: 5; far: 10;" -->
             <a-assets>
                 <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-mtl" src="models/wooden boxes pack.mtl"></a-asset-item>
                 <a-asset-item id="panel-obj" src="models/objPanel.obj"></a-asset-item>
                 <a-asset-item id="panel-mtl" src="models/objPanel.mtl"></a-asset-item>
-                <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item>
+                <!-- <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item> -->
                 <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
                 <a-asset-item id="weapon-obj" src="models/Railgun_Prototype-Wavefront OBJ.obj"></a-asset-item>
@@ -656,7 +661,7 @@
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
                 <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
-                <a-image id="display-mat" src="models/scifi_display.jpg"></a-image>
+                <!-- <a-image id="display-mat" src="models/scifi_display.jpg"></a-image> -->
                 <a-image id="weapon-green-mat" src="models/rail-gun-green.jpg"></a-image>
                 <a-image id="weapon-blue-mat" src="models/rail-gun-blue.jpg"></a-image>
                 <a-image id="weapon-red-mat" src="models/rail-gun-red.jpg"></a-image>
@@ -690,7 +695,7 @@
 				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
 
                 <!-- Monitor -->
-                <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity>
+                <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
 
                 <!-- Vehicle structure -->
                 <a-entity obj-model="obj: #wall-panel-obj;" material="src: #rustic-floor" position="-1.5 0 0.955" rotation="0 0 0"></a-entity>
