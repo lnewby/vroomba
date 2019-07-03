@@ -279,15 +279,12 @@
                         let entityId = action.entityId;
                         if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
                             AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
-                        } else if (entityId == "start") {
-                            console.log("start game");
-                            let startGame = document.querySelector("#start");
-                            startGame.parentNode.removeChild(startGame);
-
+                        } else if (entityId == "start-bunny") {
+                            console.log("Game Started!");
                             let shootToStart = document.querySelector("#shoottostart");
                             shootToStart.parentNode.removeChild(shootToStart);
 
-                            AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
+                            AFRAME.scenes[0].emit('gameStarted', {});
                         } else if (entityId.startsWith("MM_")) {
                             let enemyId = entityId;
                             let enemyEl = document.querySelector('#' + enemyId);
@@ -714,7 +711,7 @@
             <!-- <a-entity weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
             <a-entity id="weapon-model" obj-model="obj: #weapon-obj" material="src: #weapon-green-mat"></a-entity>
 
-			<a-entity vehicle position="0 0 0" rotation="0 0 0">
+			<a-entity vehicle="isVisiblePos: false" position="0 0 0" rotation="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
@@ -749,15 +746,18 @@
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
                     <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
-                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0" geometry="">
+                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0.0001">
                         <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.43336 0.16424 0.0076" width="0.8" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
 
-                <a-entity id="shoottostart" text="value: SHOOT TO START; align: center; visible: true; transparent: false; color: black" geometry="primitive: plane; height: 1; width: 3; transparent: true;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
-
-                <a-entity class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations text="value: BLAST TO START; align: center; visible: true; transparent: false; color: black" geometry="primitive: plane; height: 1; width: 3; transparent: true;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+                
+                <!-- Game Start -->
+                <a-entity id="shoottostart" position="0 1.5 -1">
+                    <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
+                    <a-entity text="value: SHOOT TO START; align: center; visible: true; transparent: false; color: black; height: 1; width: 3;" position="0 -0.1 0"></a-entity>
+                </a-entity>
 
 
                 <!-- Interior decor -->
@@ -788,8 +788,6 @@
             let vehicle = document.querySelector('a-entity[vehicle]');
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
-            let startGame = document.querySelector('#start');
-            // let shootToStart = document.querySelector('#shoot-to-start');
 		</script>
 	</body>
 </html>
