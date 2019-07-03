@@ -133,8 +133,9 @@
             this.data.gameStarted = true;
         },
 
-        resetNumMonsters: function(){
+        nextLevel: function(poolSize){
             this.monsterCounter = 0;
+            this.data.spawnPoolSize = poolSize;
         },
 
         registerSpawningZone: function() {

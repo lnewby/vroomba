@@ -203,20 +203,28 @@
                     enemyIds: [],
 		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
-                    endLevel: 3,
+                    endLevel: 5,
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
-                            totalEnemies: 2,
+                            totalEnemies: 5,
                         },
                         2: {
                             enemiesDefeated: 0,
-                            totalEnemies: 3,
+                            totalEnemies: 10,
                         },
                         3: {
                             enemiesDefeated: 0,
-                            totalEnemies: 4,
+                            totalEnemies: 15,
                         },
+                        4: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 20,
+                        },
+                        5: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 25,
+                        }
                     }
                 },
 
@@ -229,11 +237,18 @@
                         spawner2.gameStarted();
                         state.message = "GAME STARTED!";
                     },
+                    gameWon: function(state, action){
+                        state.message = "You devoured all the dust bunnies!";
+                    },
+                    gameLost: function(state, action){
+                        state.message = "You were devoured by the dust bunnies!";
+                    },
                     nextLevel: function(state, action){
                         var spawner1 = document.querySelector('#spawner1').components.spawner;
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
-                        spawner1.resetNumMonsters();
-                        spawner2.resetNumMonsters();
+                        let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
+                        spawner1.nextLevel(totalEnemies);
+                        spawner2.nextLevel(totalEnemies);
                         state.currentLevel++;
                     },
                     enemyCreated: function(state, action){
@@ -292,13 +307,15 @@
                         state.enemiesDefeated += 1;
                         state.enemiesAlive = state.enemyIds.length;
 
-                        if (!(state.currentLevel > state.endLevel)) {
+                        if (state.currentLevel <= state.endLevel) {
                             state.levelMap[state.currentLevel].enemiesDefeated += 1;
                             let levelObj = state.levelMap[state.currentLevel];
                             if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
                                 state.currentLevel += 1;
                                 AFRAME.scenes[0].emit('nextLevel');
                             }
+                        } else {
+                            AFRAME.scenes[0].emit('gameWon');
                         }
                     },
                     playerHit: function(state, action){
@@ -310,7 +327,7 @@
                         let sceneEl2 = document.querySelector('#glass-panel');
                         sceneEl2.emit('myHurt');
                         if (state.playerHealth <= 0){
-                            state.message = "You were devoured by the dust bunnies!";
+                            AFRAME.scenes[0].emit('gameLost');
                         }
                     },
                     weaponChanged: function(state, action){
@@ -481,13 +498,13 @@
 
                 dealDamage: function(player, target, enemyIds){
                     let currentWeaponDamage = this.weaponInfo[this.currentWeaponEffect].damage;
-                    this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     if (this.currentWeaponEffect == "splash"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 2);
                         for (let i = 0; i < nearbyEnemies.length; i++){
                             let enemy = nearbyEnemies[i];
                             this.el.sceneEl.systems.monster.onHit(enemy, currentWeaponDamage/2);
                         }
+                        this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     } else if (this.currentWeaponEffect == "snipe"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 1);
                         //console.log(nearbyEnemies);
@@ -496,6 +513,8 @@
                         } else {
                             this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage/2);
                         }
+                    } else {
+                        this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     }
                 },
 
