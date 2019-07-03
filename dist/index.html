@@ -603,7 +603,7 @@
                 }
             });
 
-            AFRAME.registerComponent('collider-check', {
+            AFRAME.registerComponent('weapon-trigger', {
                 dependencies: ['raycaster'],
 
                 init: function () {
@@ -621,7 +621,15 @@
                     this.el.addEventListener('triggerdown', () => {
                         sceneEl.emit('weaponFired', {});
                     });
+                    this.weapon = document.querySelector('#weapon-model');
+                },
+
+                tick: function () {
+                    var r = this.el.object3D.rotation;
+                    this.weapon.setAttribute('position', this.el.getAttribute('position'));
+                    this.weapon.setAttribute('rotation', {x: 0, y: -(r.y*360/(2*Math.PI))+90, z: 0});
                 }
+                
             });
 
             /* global AFRAME, THREE */
@@ -699,9 +707,9 @@
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
 
             <!-- Vive controller weapon -->
-            <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            <a-entity obj-model="obj: #weapon-obj" material="src: #weapon-green-mat" position="-0.169 1.268 0"></a-entity>
+            <a-entity weapon-trigger laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <!-- <a-entity weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
+            <a-entity id="weapon-model" obj-model="obj: #weapon-obj" material="src: #weapon-green-mat"></a-entity>
 
 			<a-entity vehicle position="0 0 0" rotation="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
