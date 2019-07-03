@@ -284,6 +284,9 @@
                             let startGame = document.querySelector("#start");
                             startGame.parentNode.removeChild(startGame);
 
+                            let shootToStart = document.querySelector("#shoottostart");
+                            shootToStart.parentNode.removeChild(shootToStart);
+
                             AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
                         } else if (entityId.startsWith("MM_")) {
                             let enemyId = entityId;
@@ -752,7 +755,9 @@
 
                 </a-entity>
 
-                <a-entity class="collidable" id="start" text="value: BLAST TO START; align: center; visible: true; transparent: false; color: black" geometry="primitive: plane; height: 1; width: 3; transparent: true;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+                <a-entity id="shoottostart" text="value: SHOOT TO START; align: center; visible: true; transparent: false; color: black" geometry="primitive: plane; height: 1; width: 3; transparent: true;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+
+                <a-entity class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations text="value: BLAST TO START; align: center; visible: true; transparent: false; color: black" geometry="primitive: plane; height: 1; width: 3; transparent: true;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
 
 
                 <!-- Interior decor -->
@@ -784,6 +789,7 @@
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
             let startGame = document.querySelector('#start');
+            // let shootToStart = document.querySelector('#shoot-to-start');
 		</script>
 	</body>
 </html>
