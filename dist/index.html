@@ -230,12 +230,8 @@
 
                 handlers: {
                     gameStarted: function(state, action){
-                        //var monsterComponent = document.querySelector('#monster1');
-                        var spawner1 = document.querySelector('#spawner1').components.spawner;
-                        var spawner2 = document.querySelector('#spawner2').components.spawner;
-                        spawner1.gameStarted();
-                        spawner2.gameStarted();
                         state.message = "GAME STARTED!";
+                        this.nextLevel(state, action);
                     },
                     gameWon: function(state, action){
                         state.message = "You devoured all the dust bunnies!";
@@ -247,8 +243,11 @@
                         var spawner1 = document.querySelector('#spawner1').components.spawner;
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
+                        spawner1.gameStarted();
+                        spawner2.gameStarted();
                         spawner1.nextLevel(totalEnemies);
                         spawner2.nextLevel(totalEnemies);
+                        state.enemiesAlive = totalEnemies * 2;
                         state.currentLevel++;
                     },
                     enemyCreated: function(state, action){
@@ -305,7 +304,6 @@
 						}
 						state.defeatedEnemyIds.push(enemyId);
                         state.enemiesDefeated += 1;
-                        state.enemiesAlive = state.enemyIds.length;
 
                         if (state.currentLevel <= state.endLevel) {
                             state.levelMap[state.currentLevel].enemiesDefeated += 1;
@@ -707,7 +705,7 @@
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
 
             <!-- Vive controller weapon -->
-            <a-entity weapon-trigger laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <a-entity weapon-trigger laser-controls="hand: right; model: false" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
             <!-- <a-entity weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
             <a-entity id="weapon-model" obj-model="obj: #weapon-obj" material="src: #weapon-green-mat"></a-entity>
 
@@ -740,7 +738,8 @@
                     <!-- Stat: health, level, enemies alive -->
                     <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
                     <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
-                    <a-text id="stat-enemyalive" bind__value="value: 30" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
+                    <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
+                    <a-text id="stat-enemydefeated" bind__value="value: enemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.943 0 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
@@ -770,11 +769,11 @@
 
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
-                <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, 0"></a-entity>
-                <a-entity monster="monsterType: teal; health: 100" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: teal; health: 30" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
 
-                <a-entity spawner="monster: #monster2" id="spawner2" position="-3, 0.0001, 4"></a-entity>
-                <a-entity monster="monsterType: red" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: red; health: 10" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
 
