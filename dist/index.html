@@ -291,6 +291,8 @@
                             let enemyEl = document.querySelector('#' + enemyId);
                             let player = document.querySelector('#player');
                             if (enemyEl) {
+                                let themeSound = document.querySelector('a-entity[sound]');
+                                themeSound.components.sound.playSound();
                                 systems.weapon.doEffect(player, enemyEl, state.enemyIds);
                             }
                         }
@@ -303,6 +305,8 @@
 
                         if (state.enemyIds.includes(enemyId)){
                             state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+                                let deadSound = document.querySelector("#s-dead");
+                                deadSound.components.sound.playSound();
                                 return value != enemyId;
                             });
 						}
@@ -637,7 +641,7 @@
                     this.weapon.setAttribute('position', this.el.getAttribute('position'));
                     this.weapon.setAttribute('rotation', {x: 0, y: -(r.y*360/(2*Math.PI))+90, z: 0});
                 }
-                
+
             });
 
             /* global AFRAME, THREE */
@@ -705,12 +709,16 @@
                 <a-image id="door" src="models/space_door.jpg"></a-image>
                 <a-image id="screen" src="models/screen.png"></a-image>
 
-                <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+                <a-sound id="s-theme" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
+                <a-sound id="s-dead" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+
             </a-assets>
 
             <a-sky color="black" ></a-sky>
 
-            <a-entity sound="src: #s-theme"></a-entity>
+            <a-entity sound="src: #s-theme; poolSize: 10"></a-entity>
+            <a-entity sound="src: #s-dead; poolSize: 10"></a-entity>
+
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
 
@@ -761,7 +769,7 @@
 
                 </a-entity>
 
-                
+
                 <!-- Game Start -->
                 <a-entity id="shoottostart" position="0 1.5 -1">
                     <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
@@ -780,10 +788,10 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: teal; health: 30" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: teal; health: 30" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: red; health: 10" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: red; health: 10" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
             </a-entity>
 

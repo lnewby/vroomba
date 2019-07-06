@@ -212,16 +212,23 @@
             var bufferZone = this.data.space;
             var targetPosition = this.data.target.object3D.position;
             var currentPosition = this.el.object3D.position;
+
+
+            currentPosition.x += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+            currentPosition.y += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+            currentPosition.z += (Math.round(Math.random()) * 2 - 1)*Math.random()/50;
+
+
             directionVec3.copy(targetPosition).sub(currentPosition);
             var distance = directionVec3.length();
-          
+
             // Monster hit damage player
             if (distance < bufferZone) {
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
                     //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
-                    
+
                     this.el.sceneEl.emit('playerHit', {damage: 5});
-                    
+
 
                     this.playerDamageTracker = 0;
                 }
@@ -236,7 +243,7 @@
 
             var factor = this.data.speed / distance;
             directionVec3.x *= factor * (timeDelta / 1000);
-            directionVec3.y *= 0;
+            directionVec3.y *= factor * (timeDelta / 1000);
             directionVec3.z *= factor * (timeDelta / 1000);
 
             this.el.setAttribute('position', {
