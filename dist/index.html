@@ -194,7 +194,7 @@
                 initialState: {
                     playerHealth: "50",
                     message: "Awaiting new message...",
-                    currentLevel: 1,
+                    currentLevel: 0,
                     pushWeaponCooldownText: "PUSH CD: ",
                     pullWeaponCooldownText: "PULL CD: ",
                     numEnemiesInLevel: 10,
@@ -248,7 +248,6 @@
                         spawner1.nextLevel(totalEnemies);
                         spawner2.nextLevel(totalEnemies);
                         state.enemiesAlive = totalEnemies * 2;
-                        state.currentLevel++;
                     },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
@@ -304,6 +303,7 @@
 						}
 						state.defeatedEnemyIds.push(enemyId);
                         state.enemiesDefeated += 1;
+                        state.enemiesAlive -= 1;
 
                         if (state.currentLevel <= state.endLevel) {
                             state.levelMap[state.currentLevel].enemiesDefeated += 1;
@@ -739,7 +739,7 @@
                     <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
                     <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
                     <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
-                    <a-text id="stat-enemydefeated" bind__value="value: enemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.943 0 0"></a-text>
+                    <a-text id="stat-enemydefeated" bind__value="value: enemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
