@@ -202,43 +202,59 @@
                     pushWeaponCooldownText: "PUSH CD: ",
                     pullWeaponCooldownText: "PULL CD: ",
                     numEnemiesInLevel: 10,
+                    totalEnemiesDefeated: 0,
                     enemiesDefeated: 0,
                     enemiesAlive: 0,
                     enemyIds: [],
 		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
-                    endLevel: 3,
+                    endLevel: 5,
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
-                            totalEnemies: 2,
+                            totalEnemies: 5,
                         },
                         2: {
                             enemiesDefeated: 0,
-                            totalEnemies: 3,
+                            totalEnemies: 10,
                         },
                         3: {
                             enemiesDefeated: 0,
-                            totalEnemies: 4,
+                            totalEnemies: 15,
                         },
+                        4: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 20,
+                        },
+                        5: {
+                            enemiesDefeated: 0,
+                            totalEnemies: 25,
+                        }
                     }
                 },
 
                 handlers: {
                     gameStarted: function(state, action){
-                        //var monsterComponent = document.querySelector('#monster1');
-                        var spawner1 = document.querySelector('#spawner1').components.spawner;
-                        var spawner2 = document.querySelector('#spawner2').components.spawner;
-                        spawner1.gameStarted();
-                        spawner2.gameStarted();
                         state.message = "GAME STARTED!";
+                        this.nextLevel(state, action);
+                    },
+                    gameWon: function(state, action){
+                        state.message = "You devoured all the dust bunnies!";
+                    },
+                    gameLost: function(state, action){
+                        state.message = "You were devoured by the dust bunnies!";
                     },
                     nextLevel: function(state, action){
                         var spawner1 = document.querySelector('#spawner1').components.spawner;
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
-                        spawner1.resetNumMonsters();
-                        spawner2.resetNumMonsters();
-                        state.currentLevel++;
+                        let noSpawner = 2;
+                        let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
+                        spawner1.gameStarted();
+                        spawner2.gameStarted();
+                        spawner1.nextLevel(totalEnemies);
+                        spawner2.nextLevel(totalEnemies);
+                        state.enemiesAlive = totalEnemies * noSpawner;
+                        state.enemiesDefeated = 0;
                     },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
@@ -268,17 +284,19 @@
                         let entityId = action.entityId;
                         if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
                             AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
-                        } else if (entityId == "start") {
-                            console.log("start game");
-                            let startGame = document.querySelector("#start");
-                            startGame.parentNode.removeChild(startGame);
+                        } else if (entityId == "start-bunny") {
+                            console.log("Game Started!");
+                            let shootToStart = document.querySelector("#shoottostart");
+                            shootToStart.parentNode.removeChild(shootToStart);
 
-                            AFRAME.scenes[0].emit('gameStarted', {effect: entityId});
+                            AFRAME.scenes[0].emit('gameStarted', {});
                         } else if (entityId.startsWith("MM_")) {
                             let enemyId = entityId;
                             let enemyEl = document.querySelector('#' + enemyId);
                             let player = document.querySelector('#player');
                             if (enemyEl) {
+                                let themeSound = document.querySelector('a-entity[sound]');
+                                themeSound.components.sound.playSound();
                                 systems.weapon.doEffect(player, enemyEl, state.enemyIds);
                             }
                         }
@@ -286,35 +304,49 @@
                         AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
+                        let noSpawner = 2;
                         let enemyId = action.enemyId;
+
                         if (state.enemyIds.includes(enemyId)){
                             state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+                                let deadSound = document.querySelector("#s-dead");
+                                deadSound.components.sound.playSound();
                                 return value != enemyId;
                             });
 						}
 						state.defeatedEnemyIds.push(enemyId);
+                        state.enemiesAlive -= 1;
+                        state.totalEnemiesDefeated += 1;
                         state.enemiesDefeated += 1;
-                        state.enemiesAlive = state.enemyIds.length;
 
-                        if (!(state.currentLevel > state.endLevel)) {
-                            state.levelMap[state.currentLevel].enemiesDefeated += 1;
-                            let levelObj = state.levelMap[state.currentLevel];
-                            if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
+                        if (state.currentLevel <= state.endLevel) {
+                            // state.levelMap[state.currentLevel].enemiesDefeated += 1;
+                            // let levelObj = state.levelMap[state.currentLevel];
+                            // if (levelObj.enemiesDefeated >= levelObj.totalEnemies * noSpawner) {
+                            //     state.currentLevel += 1;
+                            //     AFRAME.scenes[0].emit('nextLevel');
+                            // }
+                            if (state.enemiesAlive <= 0) {
                                 state.currentLevel += 1;
                                 AFRAME.scenes[0].emit('nextLevel');
                             }
+                        } else {
+                            AFRAME.scenes[0].emit('gameWon');
                         }
                     },
                     playerHit: function(state, action){
+                        var sceneEl = document.querySelector('a-scene');
                         let damage = action.damage;
+                        let id = action.enemyId;
+                        var enemyEl = document.querySelector('#' + id);
                         if (state.playerHealth > 0) {
                             state.playerHealth -= damage;
+                            let sceneEl2 = document.querySelector('#glass-panel');
+                            sceneEl2.emit('myHurt');
+                            sceneEl.systems.monster.onHit(enemyEl,1000);
                         }
-                        var sceneEl = document.querySelector('a-scene');
-                        let sceneEl2 = document.querySelector('#glass-panel');
-                        sceneEl2.emit('myHurt');
                         if (state.playerHealth <= 0){
-                            state.message = "You were devoured by the dust bunnies!";
+                            AFRAME.scenes[0].emit('gameLost');
                         }
                     },
                     weaponChanged: function(state, action){
@@ -485,13 +517,13 @@
 
                 dealDamage: function(player, target, enemyIds){
                     let currentWeaponDamage = this.weaponInfo[this.currentWeaponEffect].damage;
-                    this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     if (this.currentWeaponEffect == "splash"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 2);
                         for (let i = 0; i < nearbyEnemies.length; i++){
                             let enemy = nearbyEnemies[i];
                             this.el.sceneEl.systems.monster.onHit(enemy, currentWeaponDamage/2);
                         }
+                        this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     } else if (this.currentWeaponEffect == "snipe"){
                         let nearbyEnemies = this.getMonstersWithinDistanceOfTarget(target, enemyIds, 1);
                         //console.log(nearbyEnemies);
@@ -500,6 +532,8 @@
                         } else {
                             this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage/2);
                         }
+                    } else {
+                        this.el.sceneEl.systems.monster.onHit(target, currentWeaponDamage);
                     }
                 },
 
@@ -588,7 +622,7 @@
                 }
             });
 
-            AFRAME.registerComponent('collider-check', {
+            AFRAME.registerComponent('weapon-trigger', {
                 dependencies: ['raycaster'],
 
                 init: function () {
@@ -606,7 +640,15 @@
                     this.el.addEventListener('triggerdown', () => {
                         sceneEl.emit('weaponFired', {});
                     });
+                    this.weapon = document.querySelector('#weapon-model');
+                },
+
+                tick: function () {
+                    var r = this.el.object3D.rotation;
+                    this.weapon.setAttribute('position', this.el.getAttribute('position'));
+                    this.weapon.setAttribute('rotation', {x: 0, y: -(r.y*360/(2*Math.PI))+90, z: 0});
                 }
+
             });
 
             /* global AFRAME, THREE */
@@ -677,21 +719,25 @@
                 <a-image id="door" src="models/space_door.jpg"></a-image>
                 <a-image id="screen" src="models/screen.png"></a-image>
 
-                <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+                <a-sound id="s-theme" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
+                <a-sound id="s-dead" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+
             </a-assets>
 
             <a-sky color="black" ></a-sky>
 
-            <a-entity sound="src: #s-theme"></a-entity>
+            <a-entity sound="src: #s-theme; poolSize: 10"></a-entity>
+            <a-entity sound="src: #s-dead; poolSize: 10"></a-entity>
+
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
 
             <!-- Vive controller weapon -->
-            <a-entity collider-check laser-controls="hand: right" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            <a-entity collider-check laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            <a-entity obj-model="obj: #weapon-obj" material="src: #weapon-green-mat" position="-0.169 1.268 0"></a-entity>
+            <a-entity weapon-trigger laser-controls="hand: right; model: false" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <!-- <a-entity weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
+            <a-entity id="weapon-model" obj-model="obj: #weapon-obj" material="src: #weapon-green-mat"></a-entity>
 
-			<a-entity vehicle position="0 0 0" rotation="0 0 0">
+			<a-entity vehicle="isVisiblePos: false" position="0 0 0" rotation="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
 					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
@@ -720,19 +766,25 @@
                     <!-- Stat: health, level, enemies alive -->
                     <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
                     <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
-                    <a-text id="stat-enemyalive" bind__value="value: 30" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
+                    <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
+                    <a-text id="stat-enemydefeated" bind__value="value: totalEnemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
                     <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
-                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0" geometry="">
+                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0.0001">
                         <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.43336 0.16424 0.0076" width="0.8" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
 
-                <a-entity id="start" text="value: Start Game; align: center; visible: true; transparent: false" geometry="primitive: plane; height: 1; width: 1; transparent: trues;" material=" opacity: 0.2; transparent: true" position="0 1.5 -1"></a-entity>
+
+                <!-- Game Start -->
+                <a-entity id="shoottostart" position="0 1.5 -1">
+                    <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
+                    <a-entity text="value: SHOOT TO START; align: center; visible: true; transparent: false; color: black; height: 1; width: 3;" position="0 -0.1 0"></a-entity>
+                </a-entity>
 
 
                 <a-entity 
@@ -752,11 +804,11 @@
 
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
-                <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, 0"></a-entity>
-                <a-entity monster="monsterType: teal; health: 100" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: teal; health: 30" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
 
-                <a-entity spawner="monster: #monster2" id="spawner2" position="-3, 0.0001, 4"></a-entity>
-                <a-entity monster="monsterType: red" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" play-all-model-animations></a-entity>
+                <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
+                <a-entity monster="monsterType: red; health: 10" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
                 
             </a-entity>
@@ -771,7 +823,6 @@
             let vehicle = document.querySelector('a-entity[vehicle]');
             let leftWall = document.querySelector('#left-wall');
             let rightWall = document.querySelector('#right-wall');
-            let startGame = document.querySelector('#start');
 		</script>
 	</body>
 </html>
