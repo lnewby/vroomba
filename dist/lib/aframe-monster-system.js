@@ -227,8 +227,8 @@
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
                     //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
 
-                    this.el.sceneEl.emit('playerHit', {damage: 5});
-
+                    // this.el.sceneEl.emit('playerHit', {damage: 5});
+                    this.el.sceneEl.emit('playerHit', {damage: 5, enemyId: this.el.id});
 
                     this.playerDamageTracker = 0;
                 }

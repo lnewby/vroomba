@@ -331,13 +331,16 @@
                         }
                     },
                     playerHit: function(state, action){
+                        var sceneEl = document.querySelector('a-scene');
                         let damage = action.damage;
+                        let id = action.enemyId;
+                        var enemyEl = document.querySelector('#' + id);
                         if (state.playerHealth > 0) {
                             state.playerHealth -= damage;
+                            let sceneEl2 = document.querySelector('#glass-panel');
+                            sceneEl2.emit('myHurt');
+                            sceneEl.systems.monster.onHit(enemyEl,1000);
                         }
-                        var sceneEl = document.querySelector('a-scene');
-                        let sceneEl2 = document.querySelector('#glass-panel');
-                        sceneEl2.emit('myHurt');
                         if (state.playerHealth <= 0){
                             AFRAME.scenes[0].emit('gameLost');
                         }
@@ -764,7 +767,7 @@
                     <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
                     <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0.0001">
-                        <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.433 0.163 0" width="0.9" baseline="top" wrap-count="20" color="#faffef"></a-text>
+                        <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.43336 0.16424 0.0076" width="0.8" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
