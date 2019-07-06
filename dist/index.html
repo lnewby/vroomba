@@ -194,10 +194,11 @@
                 initialState: {
                     playerHealth: "50",
                     message: "Awaiting new message...",
-                    currentLevel: 0,
+                    currentLevel: 1,
                     pushWeaponCooldownText: "PUSH CD: ",
                     pullWeaponCooldownText: "PULL CD: ",
                     numEnemiesInLevel: 10,
+                    totalEnemiesDefeated: 0,
                     enemiesDefeated: 0,
                     enemiesAlive: 0,
                     enemyIds: [],
@@ -242,12 +243,14 @@
                     nextLevel: function(state, action){
                         var spawner1 = document.querySelector('#spawner1').components.spawner;
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
+                        let noSpawner = 2;
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
                         spawner1.gameStarted();
                         spawner2.gameStarted();
                         spawner1.nextLevel(totalEnemies);
                         spawner2.nextLevel(totalEnemies);
-                        state.enemiesAlive = totalEnemies * 2;
+                        state.enemiesAlive = totalEnemies * noSpawner;
+                        state.enemiesDefeated = 0;
                     },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
@@ -295,20 +298,27 @@
                         AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
+                        let noSpawner = 2;
                         let enemyId = action.enemyId;
+
                         if (state.enemyIds.includes(enemyId)){
                             state.enemyIds = state.enemyIds.filter(function(value, index, arr){
                                 return value != enemyId;
                             });
 						}
 						state.defeatedEnemyIds.push(enemyId);
-                        state.enemiesDefeated += 1;
                         state.enemiesAlive -= 1;
+                        state.totalEnemiesDefeated += 1;
+                        state.enemiesDefeated += 1;
 
                         if (state.currentLevel <= state.endLevel) {
-                            state.levelMap[state.currentLevel].enemiesDefeated += 1;
-                            let levelObj = state.levelMap[state.currentLevel];
-                            if (levelObj.enemiesDefeated >= levelObj.totalEnemies) {
+                            // state.levelMap[state.currentLevel].enemiesDefeated += 1;
+                            // let levelObj = state.levelMap[state.currentLevel];
+                            // if (levelObj.enemiesDefeated >= levelObj.totalEnemies * noSpawner) {
+                            //     state.currentLevel += 1;
+                            //     AFRAME.scenes[0].emit('nextLevel');
+                            // }
+                            if (state.enemiesAlive <= 0) {
                                 state.currentLevel += 1;
                                 AFRAME.scenes[0].emit('nextLevel');
                             }
@@ -739,7 +749,7 @@
                     <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
                     <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
                     <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
-                    <a-text id="stat-enemydefeated" bind__value="value: enemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
+                    <a-text id="stat-enemydefeated" bind__value="value: totalEnemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
