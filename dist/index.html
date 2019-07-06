@@ -261,6 +261,12 @@
                         state.enemyIds.push(enemyId);
                     },
                     weaponFired: function(state, action) {
+                        if (navigator.getGamepads) {
+                            for (let gamepad of navigator.getGamepads()) {
+                                gamepad.hapticActuators.pulse(1, 1000);
+                            }
+                            // navigator.getGamepads()[1].hapticActuators[0].pulse( 1, 1000 );
+                        }
                         for (let id of state.enemiesRayHitIds) {
                             AFRAME.scenes[0].emit('entityHit', {entityId: id});
                         }
@@ -344,6 +350,13 @@
                             let sceneEl2 = document.querySelector('#glass-panel');
                             sceneEl2.emit('myHurt');
                             sceneEl.systems.monster.onHit(enemyEl,1000);
+
+                            // Provide haptic feedback when player is taking damage
+                            if (navigator.getGamepads) {
+                                for (let gamepad of navigator.getGamepads()) {
+                                    gamepad.hapticActuators[0].pulse(2, 500);
+                                }
+                            }
                         }
                         if (state.playerHealth <= 0){
                             AFRAME.scenes[0].emit('gameLost');
