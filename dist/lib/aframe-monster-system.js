@@ -9,7 +9,8 @@
             healthBarWidth: {type: 'number', default: 0.7},
             healthBarHeight: {type: 'number', default: 0.06},
             damageRate: {type: 'number', default: 100},
-            damagePt: {type: 'number', default: 10}
+            damagePt: {type: 'number', default: 10},
+            opacity: {type: 'number', default: 1}
         },
 
         init: function () {
@@ -35,8 +36,22 @@
             //     color: 'pink'
             // });
             healthBar.setAttribute('position', {x: 0, y: 0.727, z: 0});
-        }
 
+            this.el.addEventListener('model-loaded', this.update.bind(this));
+        },
+
+        update: function () {
+            var mesh = this.el.getObject3D('mesh');
+            var opacity = this.data.opacity;
+            if (!mesh) { return; }
+            mesh.traverse(function (node) {
+                if (node.isMesh) {
+                    node.material.opacity = opacity;
+                    node.material.transparent = opacity < 1.0;
+                    node.material.needsUpdate = true;
+                }
+            });
+        }
     });
 
 

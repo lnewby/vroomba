@@ -296,7 +296,7 @@
                             shootToStart.parentNode.removeChild(shootToStart);
 
                             AFRAME.scenes[0].emit('gameStarted', {});
-                        } else if (entityId.startsWith("MM_")) {
+                        } else if (entityId && entityId.startsWith("MM_")) {
                             let enemyId = entityId;
                             let enemyEl = document.querySelector('#' + enemyId);
                             let player = document.querySelector('#player');
@@ -652,6 +652,14 @@
                     });
                     this.el.addEventListener('triggerdown', () => {
                         sceneEl.emit('weaponFired', {});
+
+                        // Provide haptic feedback when firing weapon
+                        if (navigator.getGamepads) {
+                            for (let gamepad of navigator.getGamepads()) {
+                                gamepad.hapticActuators[0].pulse(1, 50);
+                            }
+                            // navigator.getGamepads()[1].hapticActuators[0].pulse( 1, 1000 );
+                        }
                     });
                     this.weapon = document.querySelector('#weapon-model');
                 },
@@ -818,10 +826,10 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: teal; health: 30" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: teal; health: 30; opacity: 1" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: red; health: 10" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: red; health: 10; opacity: 1" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.008 0.008 0.008" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
                 <a-entity monsters></a-entity>
                 
             </a-entity>
