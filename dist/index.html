@@ -261,16 +261,17 @@
                         state.enemyIds.push(enemyId);
                     },
                     weaponFired: function(state, action) {
-                        if (navigator.getGamepads) {
-                            for (let gamepad of navigator.getGamepads()) {
-                                gamepad.hapticActuators.pulse(1, 1000);
-                            }
-                            // navigator.getGamepads()[1].hapticActuators[0].pulse( 1, 1000 );
-                        }
                         for (let id of state.enemiesRayHitIds) {
                             AFRAME.scenes[0].emit('entityHit', {entityId: id});
                         }
                         AFRAME.scenes[0].emit('entityHit', {entityId: action.entityId});
+
+                        // Provide haptic feedback for fired weapon
+                        if (navigator.getGamepads) {
+                            for (let gamepad of navigator.getGamepads()) {
+                                gamepad.hapticActuators[0].pulse(1, 50);
+                            }
+                        }
                     },
                     updateWeaponCooldown: function(state, action){
                         let effect = action.effect;
