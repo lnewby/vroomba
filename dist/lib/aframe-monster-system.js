@@ -99,13 +99,29 @@
 
         unregisterMonster: function (el) {
             console.log("Monster: removed");
-            document.querySelector('a-entity[monsters]').removeChild(el);
+            
+            
 
             // TO DO: animate explode
+            var position = el.getAttribute('position');
+            console.log(position);
+            sceneEl.systems.trigger.trigger(position);
+            document.querySelector('a-entity[monsters]').removeChild(el);
+            
+            
         }
-
     });
 
+    AFRAME.registerSystem('trigger', {
+      init: function() {
+      },
+
+      trigger: function(monsterPosition) {
+        //console.log("hello");
+        var el = document.querySelector('#explosion');
+        el.emit('particleplayerstart',{position:monsterPosition});
+      }
+    });
 
     AFRAME.registerComponent('spawner', {
 
@@ -192,6 +208,8 @@
     });
 
 
+
+
     AFRAME.registerComponent('follow', {
 
         schema: {
@@ -217,7 +235,7 @@
             // Monster hit damage player
             if (distance < bufferZone) {
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
-                    console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
+                    //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
                     
                     this.el.sceneEl.emit('playerHit', {damage: 5});
                     
