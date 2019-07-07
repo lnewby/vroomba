@@ -162,6 +162,7 @@
 
         gameStarted: function() {
             this.data.gameStarted = true;
+
         },
 
         nextLevel: function(poolSize){
