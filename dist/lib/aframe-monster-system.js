@@ -100,6 +100,8 @@
                     el.setAttribute('monster', {health: remainingHealth});
                     var healthBarValue = (remainingHealth/monsterData.maxHealth) * monsterData.healthBarWidth;
                     el.querySelector('a-plane').setAttribute('width', healthBarValue);
+                    el.components.sound.stopSound();
+                    el.components.sound.playSound();
                     //el.querySelector('a-entity[text]').setAttribute('text', {value: remainingHealth});
                     //console.log("Monster: hit " + el.id + " " + currentHealth + "->" + remainingHealth);
                 } else {

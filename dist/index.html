@@ -39,7 +39,7 @@
             var url="http://localhost:8080/getredisdata";
 
             function worker () {
-                fetch(url).then(response => response.json())
+                var result = fetch(url).then(response => response.json())
                     .then( (result) => {
                         //console.log('success:', result);
                         let j = JSON.parse(result[1]).data;
@@ -51,10 +51,12 @@
                         }
                     })
                     .catch(error => console.log('error:', error));
-                setTimeout("worker ()", 11);
+
+                if (result.PromiseValue)
+                    setTimeout("worker ()", 11);
             }
 
-            //worker ();
+            worker ();
 
 
             AFRAME.registerComponent('vehicle', {
@@ -236,6 +238,8 @@
                 handlers: {
                     gameStarted: function(state, action){
                         state.message = "Dust bunnies approaching...";
+                        let themeSound = document.querySelector("#s-theme");
+                        themeSound.components.sound.playSound();
                         this.nextLevel(state, action);
                     },
                     gameWon: function(state, action){
@@ -326,8 +330,8 @@
                             let enemyEl = document.querySelector('#' + enemyId);
                             let player = document.querySelector('#player');
                             if (enemyEl) {
-                                let themeSound = document.querySelector('a-entity[sound]');
-                                themeSound.components.sound.playSound();
+                                // let hitSound = document.querySelector('#s-hit');
+                                // hitSound.components.sound.playSound();
                                 systems.weapon.doEffect(player, enemyEl, state.enemyIds);
                             }
                         }
@@ -335,17 +339,19 @@
                         AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
-                        let noSpawner = 2;
                         let enemyId = action.enemyId;
 
-                        if (state.enemyIds.includes(enemyId)){
-                            state.enemyIds = state.enemyIds.filter(function(value, index, arr){
-                                let deadSound = document.querySelector("#s-dead");
-                                deadSound.components.sound.playSound();
-                                return value != enemyId;
-                            });
-						}
-						state.defeatedEnemyIds.push(enemyId);
+                        let deadSound = document.querySelector('#s-dead');
+                        deadSound.components.sound.playSound();
+
+      //                   if (state.enemyIds.includes(enemyId)){
+      //                       state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+      //                           let deadSound = document.querySelector("#s-dead");
+      //                           deadSound.components.sound.playSound();
+      //                           return value != enemyId;
+      //                       });
+						// }
+						// state.defeatedEnemyIds.push(enemyId);
                         state.enemiesAlive -= 1;
                         state.totalEnemiesDefeated += 1;
                         state.enemiesDefeated += 1;
@@ -779,9 +785,9 @@
                 <a-image id="wave4" src="models/w4.png"></a-image>
                 <a-image id="wave5" src="models/w5.png"></a-image>
 
-
-                <a-sound id="s-theme" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
-                <a-sound id="s-dead" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+                <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
+                <a-sound id="s-hit" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
+                <a-sound id="s-dead" src="sounds/Enemy_sounds/goatOnly.m4a" preload="auto"></a-sound>
 
             </a-assets>
 
@@ -880,12 +886,12 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, -5"></a-entity>
-                <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" >
+                <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" sound="src: #s-hit; volume: 5">
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="3, 0.0001, -5"></a-entity>
-                <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" >
+                <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" sound="src: #s-hit; volume: 5">
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
