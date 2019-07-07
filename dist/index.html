@@ -371,7 +371,28 @@
                         }
                     },
                     weaponChanged: function(state, action){
-                        AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
+                        if (state.weaponID == 0){
+                            console.log("trackpaddown: pull");
+                            state.weaponID++;
+                            AFRAME.scenes[0].systems.weapon.weaponChanged("pull");
+                        } else if (state.weaponID == 1){
+                            console.log("trackpaddown: push");
+                            state.weaponID++;
+                            AFRAME.scenes[0].systems.weapon.weaponChanged("push");
+                        } else if (state.weaponID == 2){
+                            console.log("trackpaddown: splash");
+                            state.weaponID++;
+                            AFRAME.scenes[0].systems.weapon.weaponChanged("splash");
+                        } else if (state.weaponID == 3){
+                            console.log("trackpaddown: snipe");
+                            state.weaponID++;
+                            AFRAME.scenes[0].systems.weapon.weaponChanged("snipe");
+                        } else if (state.weaponID == 4){
+                            console.log("trackpaddown: normal");
+                            state.weaponID = 0;
+                            AFRAME.scenes[0].systems.weapon.weaponChanged("normal");
+                        }
+
                     },
                     addEnemiesRayHit: function(state, action){
                         let id = action.id;
@@ -670,8 +691,9 @@
                     });
 										this.el.addEventListener('trackpaddown', () => {
 											   console.log("trackpaddown: reached");
+												 sceneEl.emit('weaponChanged', {effect: ""});
 
-											  if (weaponID == 0){
+									/*		  if (weaponID == 0){
 													console.log("trackpaddown: 0");
 													weaponID++;
 													sceneEl.emit('weaponChanged', {effect: "pull"});
@@ -697,7 +719,7 @@
 													sceneEl.emit('weaponChanged', {effect: "normal"});
 												}
                     });
-
+*/
 
                     this.weapon = document.querySelector('#weapon-model');
                 },
