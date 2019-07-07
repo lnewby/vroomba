@@ -197,6 +197,7 @@
             AFRAME.registerState({
                 initialState: {
                     playerHealth: "50",
+                    playerMaxHealth: "50",
                     message: "Awaiting new message...",
                     currentLevel: 1,
                     pushWeaponCooldownText: "PUSH CD: ",
@@ -300,7 +301,19 @@
                             let shootToReset = document.querySelector("#shoottoreset");
                             shootToReset.parentNode.removeChild(shootToReset);
 
-                            AFRAME.scenes[0].emit('gameStarted', {});
+                            let worldScene = document.querySelector("a-entity[world]");
+                            worldScene.removeChild(worldScene.querySelector("a-entity[monsters]"));
+
+                            let monsters = document.createElement("a-entity");
+                            monsters.setAttribute('monsters', '');
+                            worldScene.appendChild(monsters);
+
+                            state.currentLevel = 1;
+                            state.totalEnemiesDefeated = 0;
+                            state.playerHealth = state.playerMaxHealth;
+                            this.gameStarted(state, action);
+
+                            // AFRAME.scenes[0].emit('gameStarted', {});
                         } else if (entityId && entityId.startsWith("MM_")) {
                             let enemyId = entityId;
                             let enemyEl = document.querySelector('#' + enemyId);
