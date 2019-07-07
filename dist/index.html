@@ -212,23 +212,23 @@
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
-                            totalEnemies: 5,
+                            totalEnemies: 3,
                         },
                         2: {
                             enemiesDefeated: 0,
-                            totalEnemies: 10,
+                            totalEnemies: 5,
                         },
                         3: {
                             enemiesDefeated: 0,
-                            totalEnemies: 15,
+                            totalEnemies: 8,
                         },
                         4: {
                             enemiesDefeated: 0,
-                            totalEnemies: 20,
+                            totalEnemies: 12,
                         },
                         5: {
                             enemiesDefeated: 0,
-                            totalEnemies: 25,
+                            totalEnemies: 17,
                         }
                     }
                 },
@@ -249,8 +249,6 @@
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
                         let noSpawner = 2;
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
-                        spawner1.gameStarted();
-                        spawner2.gameStarted();
                         spawner1.nextLevel(totalEnemies);
                         spawner2.nextLevel(totalEnemies);
                         state.enemiesAlive = totalEnemies * noSpawner;
