@@ -658,7 +658,6 @@
                             for (let gamepad of navigator.getGamepads()) {
                                 gamepad.hapticActuators[0].pulse(1, 50);
                             }
-                            // navigator.getGamepads()[1].hapticActuators[0].pulse( 1, 1000 );
                         }
                     });
                     this.weapon = document.querySelector('#weapon-model');
@@ -666,8 +665,7 @@
 
                 tick: function () {
                     var r = this.el.object3D.rotation;
-                    this.weapon.setAttribute('position', this.el.getAttribute('position'));
-                    this.weapon.setAttribute('rotation', {x: 0, y: -(r.y*360/(2*Math.PI))+90, z: 0});
+                    this.weapon.setAttribute('rotation', {x: -(r.z*180/Math.PI), y: (r.y*180/Math.PI)+90, z: (r.x*180/Math.P)});
                 }
 
             });
@@ -725,7 +723,7 @@
                 <!-- <a-asset-item id="display-obj" src="models/scifi_display_OBJ.obj"></a-asset-item> -->
                 <a-asset-item id="TV1-obj" src="models/Tv1.obj"></a-asset-item>
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
-                <a-asset-item id="weapon-obj" src="models/Railgun_Prototype-Wavefront OBJ.obj"></a-asset-item>
+                <a-asset-item id="weapon-obj" src="models/railgun.obj"></a-asset-item>
                 <a-asset-item id="zombieBunny" src="models/zombunny/scene.gltf"></a-asset-item>
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
@@ -765,7 +763,7 @@
 				</a-entity>
 
                 <!-- Camera image -->
-				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
+				<a-image backdrop src="models/bunny_screen.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
 
                 <!-- Monitor -->
                 <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
@@ -826,10 +824,15 @@
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: teal; health: 30; opacity: 1" id="monster1" position="0 0.6 -3" visible="false" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" >
+                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                </a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
-                <a-entity monster="monsterType: red; health: 10; opacity: 1" id="monster2" position="0 0.45 -3" visible="false" gltf-model="#zombieBunny" scale="0.008 0.008 0.008" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" play-all-model-animations></a-entity>
+                <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" >
+                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                </a-entity>
+
                 <a-entity monsters></a-entity>
                 
             </a-entity>
