@@ -672,7 +672,8 @@
 
                 tick: function () {
                     var r = this.el.object3D.rotation;
-                    this.weapon.setAttribute('rotation', {x: -(r.z*180/Math.PI), y: (r.y*180/Math.PI)+90, z: (r.x*180/Math.P)});
+                    this.weapon.setAttribute('position', this.el.getAttribute('position'));
+                    this.weapon.setAttribute('rotation', {x: -(r.z*180/Math.PI), y: (r.y*180/Math.PI)+90, z: (r.x*180/Math.PI)});
                 }
 
             });
