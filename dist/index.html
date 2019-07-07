@@ -186,7 +186,7 @@
             AFRAME.registerComponent('cursor-selector', {
                 init: function () {
                     this.el.addEventListener('click', (e) => {
-                        var target = e.detail.intersection.object.el;
+                        var target = e.detail.intersection.object.el.parentEl;
                         console.log("Cursor: selected " + target.id);
                         this.el.sceneEl.emit('weaponFired', {entityId: target.id});
                     });
@@ -249,12 +249,21 @@
                         var spawner2 = document.querySelector('#spawner2').components.spawner;
                         let noSpawner = 2;
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
-                        spawner1.gameStarted();
-                        spawner2.gameStarted();
-                        spawner1.nextLevel(totalEnemies);
-                        spawner2.nextLevel(totalEnemies);
-                        state.enemiesAlive = totalEnemies * noSpawner;
-                        state.enemiesDefeated = 0;
+                        
+                        var wave = document.querySelector('#waveAlert');
+                        console.log(wave);
+                        wave.setAttribute('position', {x: 0, y: 1.5, z: -1});
+                        wave.querySelector('a-image').setAttribute('src','#wave'+state.currentLevel);   
+                        setTimeout(function(){
+                            wave.setAttribute('position', {x: 0, y: 10, z: -1});
+                            spawner1.gameStarted();
+                            spawner2.gameStarted();
+                            spawner1.nextLevel(totalEnemies);
+                            spawner2.nextLevel(totalEnemies);
+                            state.enemiesAlive = totalEnemies * noSpawner;
+                            state.enemiesDefeated = 0;
+                        }, 5000);                        
+                        
                     },
                     enemyCreated: function(state, action){
                         let enemyId = action.enemyId;
@@ -761,6 +770,11 @@
                 <!-- <a-image id="shootme" src="models/shootstart.png"></a-image> -->
                 <a-image id="shootme7" src="models/shootme7.png"></a-image>
                 <!-- <a-image id="shootme5" src="models/shootme5.png"></a-image> -->
+                <a-image id="wave1" src="models/w1.png"></a-image>
+                <a-image id="wave2" src="models/w2.png"></a-image>
+                <a-image id="wave3" src="models/w3.png"></a-image>
+                <a-image id="wave4" src="models/w4.png"></a-image>
+                <a-image id="wave5" src="models/w5.png"></a-image>
 
 
                 <a-sound id="s-theme" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
@@ -832,6 +846,11 @@
                     <!-- <a-image src="#shootme5" height="0.4" width="5.8" scale="0.25" position="0 0.6 -0.18"></a-image> -->
                 </a-entity>
 
+                <!-- Wave Alert -->
+                <a-entity id="waveAlert" position="0 10 -1">
+                    <a-image src="#wave1" height="0.4" width="5.2" scale="0.3" position="0 0.6 -0.18"></a-image>
+
+                </a-entity>
 
                 <!-- Game End -->
                 <a-entity id="shoottoreset" position="0 4.5 -1" >
