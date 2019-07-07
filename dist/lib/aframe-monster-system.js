@@ -8,6 +8,7 @@
             maxHealth: {type: 'number'},
             healthBarWidth: {type: 'number', default: 0.7},
             healthBarHeight: {type: 'number', default: 0.06},
+            healthBarOffset: {type: 'number', default: 0},
             damageRate: {type: 'number', default: 100},
             damagePt: {type: 'number', default: 10},
             opacity: {type: 'number', default: 1}
@@ -35,6 +36,8 @@
             //     align: 'center',
             //     color: 'pink'
             // });
+
+            healthBar.setAttribute('position', {x: 0, y: this.data.healthBarOffset, z: 0});
             healthBar.setAttribute('position', {x: 0, y: 0.727, z: 0});
 
             this.el.addEventListener('model-loaded', this.update.bind(this));
@@ -222,8 +225,6 @@
         }
 
     });
-
-
 
 
     AFRAME.registerComponent('follow', {
