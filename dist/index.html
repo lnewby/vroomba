@@ -5,7 +5,6 @@
         <script scr="lib/aframe-extras.min.js"></script>
 		<script src="lib/aframe-state-component.min.js"></script>
 		<script src="lib/aframe-monster-system.js"></script>
-        <script src="lib/aframe-sprite-particles-component.js"></script>
         <script src="lib/aframe-particleplayer-component.min.js"></script>
 
 
@@ -664,8 +663,7 @@
 
                 tick: function () {
                     var r = this.el.object3D.rotation;
-                    this.weapon.setAttribute('position', this.el.getAttribute('position'));
-                    this.weapon.setAttribute('rotation', {x: 0, y: -(r.y*360/(2*Math.PI))+90, z: 0});
+                    this.weapon.setAttribute('rotation', {x: -(r.z*180/Math.PI), y: (r.y*180/Math.PI)+90, z: (r.x*180/Math.P)});
                 }
 
             });
@@ -763,7 +761,7 @@
 				</a-entity>
 
                 <!-- Camera image -->
-				<a-image backdrop src="models/vroomba_icon.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
+				<a-image backdrop src="models/bunny_screen.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
 
                 <!-- Monitor -->
                 <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
