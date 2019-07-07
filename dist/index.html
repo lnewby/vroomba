@@ -208,6 +208,7 @@
 		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     endLevel: 5,
+										weaponID: 0,
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
@@ -667,6 +668,30 @@
                             }
                         }
                     });
+										this.el.addEventListener('trackpaddown', () => {
+											  if (weaponID == 0){
+													weaponID++;
+													sceneEl.emit('weaponChanged', {effect: "pull"});
+												}
+												if (weaponID == 1){
+													weaponID++;
+													sceneEl.emit('weaponChanged', {effect: "push"});
+												}
+												if (weaponID == 2){
+													weaponID++;
+													sceneEl.emit('weaponChanged', {effect: "splash"});
+												}
+												if (weaponID == 3){
+													weaponID++;
+													sceneEl.emit('weaponChanged', {effect: "snipe"});
+												}
+												if (weaponID == 4){
+													weaponID = 0;
+													sceneEl.emit('weaponChanged', {effect: "normal"});
+												}
+                    });
+
+
                     this.weapon = document.querySelector('#weapon-model');
                 },
 
@@ -722,7 +747,7 @@
             <a-assets>
                 <a-asset-item id="particlesJson" src="models/particles-fireworks.json"></a-asset-item>
                 <img src="models/sprite.png" id="particleTex">
-      
+
                 <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-obj" src="models/wooden boxes pack.obj"></a-asset-item>
                 <a-asset-item id="wooden-box-mtl" src="models/wooden boxes pack.mtl"></a-asset-item>
@@ -829,7 +854,7 @@
                 </a-entity>
 
 
-                <a-entity 
+                <a-entity
                 id = "explosion"
                 position="0 1 -0.5"
                 trigger
@@ -857,9 +882,9 @@
                 </a-entity>
 
                 <a-entity monsters></a-entity>
-                
+
             </a-entity>
-            
+
 		</a-scene>
 
 		<script type="text/javascript">
