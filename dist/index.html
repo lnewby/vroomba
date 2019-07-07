@@ -669,23 +669,30 @@
                         }
                     });
 										this.el.addEventListener('trackpaddown', () => {
+											   console.log("trackpaddown: reached");
+
 											  if (weaponID == 0){
+													console.log("trackpaddown: 0");
 													weaponID++;
 													sceneEl.emit('weaponChanged', {effect: "pull"});
 												}
 												if (weaponID == 1){
+													console.log("trackpaddown: 1");
 													weaponID++;
 													sceneEl.emit('weaponChanged', {effect: "push"});
 												}
 												if (weaponID == 2){
+													console.log("trackpaddown: 2");
 													weaponID++;
 													sceneEl.emit('weaponChanged', {effect: "splash"});
 												}
 												if (weaponID == 3){
+													console.log("trackpaddown: 3");
 													weaponID++;
 													sceneEl.emit('weaponChanged', {effect: "snipe"});
 												}
 												if (weaponID == 4){
+													console.log("trackpaddown: 4");
 													weaponID = 0;
 													sceneEl.emit('weaponChanged', {effect: "normal"});
 												}
