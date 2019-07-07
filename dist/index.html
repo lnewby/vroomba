@@ -291,9 +291,13 @@
                         if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
                             AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
                         } else if (entityId == "start-bunny") {
-                            console.log("Game Started!");
                             let shootToStart = document.querySelector("#shoottostart");
                             shootToStart.parentNode.removeChild(shootToStart);
+
+                            AFRAME.scenes[0].emit('gameStarted', {});
+                        }  else if (entityId == "reset-game") {
+                            let shootToReset = document.querySelector("#shoottoreset");
+                            shootToReset.parentNode.removeChild(shootToReset);
 
                             AFRAME.scenes[0].emit('gameStarted', {});
                         } else if (entityId && entityId.startsWith("MM_")) {
@@ -360,6 +364,9 @@
                         }
                         if (state.playerHealth <= 0){
                             AFRAME.scenes[0].emit('gameLost');
+                            let shootToReset = document.querySelector("#shoottoreset");
+                            shootToReset.setAttribute("position", "0 1.5 -1");
+                            shootToReset.setAttribute("class", "collidable");
                         }
                     },
                     weaponChanged: function(state, action){
@@ -803,6 +810,13 @@
                 <a-entity id="shoottostart" position="0 1.5 -1">
                     <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
                     <a-entity text="value: SHOOT TO START; align: center; visible: true; transparent: false; color: black; height: 1; width: 3;" position="0 -0.1 0"></a-entity>
+                </a-entity>
+
+
+                <!-- Game End -->
+                <a-entity id="shoottoreset" position="0 4.5 -1" >
+                    <a-entity id="reset-game" class="collidable"  gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
+                    <a-entity text="value: SHOOT TO RESTART; align: center; visible: true; transparent: false; color: black; height: 1; width: 3;" position="0 -0.1 0"></a-entity>
                 </a-entity>
 
 
