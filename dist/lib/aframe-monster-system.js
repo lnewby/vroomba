@@ -167,6 +167,10 @@
 
         },
 
+        gameStopped: function() {
+            this.data.gameStarted = false;
+        },
+
         nextLevel: function(poolSize){
             this.monsterCounter = 0;
             this.data.spawnPoolSize = poolSize;
@@ -238,7 +242,6 @@
 
         init: function () {
             this.directionVec3 = new THREE.Vector3();
-            this.playerDamageTracker = 0;
         },
 
         tick: function (time, timeDelta) {
@@ -259,15 +262,8 @@
 
             // Monster hit damage player
             if (distance < bufferZone) {
-                if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
-                    //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
-                    this.el.sceneEl.emit('playerHit', {damage: this.data.hitDamage, enemyId: this.el.id});
-                    this.playerDamageTracker = 0;
-                }
-                else {
-                    this.playerDamageTracker++;
-                }
-                return;
+                // console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
+                this.el.sceneEl.emit('playerHit', {damage: this.data.hitDamage, enemyId: this.el.id});
             }
 
             // Move monster towards player

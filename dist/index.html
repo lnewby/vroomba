@@ -54,7 +54,7 @@
                 setTimeout("worker ()", 11);
             }
 
-            worker ();
+            //worker ();
 
 
             AFRAME.registerComponent('vehicle', {
@@ -197,7 +197,7 @@
                 initialState: {
                     playerHealth: "50",
                     playerMaxHealth: "50",
-                    message: "Awaiting new message...",
+                    message: "Shoot to start...",
                     currentLevel: 1,
                     pushWeaponCooldownText: "PUSH CD: ",
                     pullWeaponCooldownText: "PULL CD: ",
@@ -235,7 +235,7 @@
 
                 handlers: {
                     gameStarted: function(state, action){
-                        state.message = "GAME STARTED!";
+                        state.message = "Dust bunnies approaching...";
                         this.nextLevel(state, action);
                     },
                     gameWon: function(state, action){
@@ -251,11 +251,10 @@
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
                         
                         var wave = document.querySelector('#waveAlert');
-                        console.log(wave);
-                        wave.setAttribute('position', {x: 0, y: 1.5, z: -1});
+                        wave.setAttribute('position', {x: 0, y: 1, z: -1.6});
                         wave.querySelector('a-image').setAttribute('src','#wave'+state.currentLevel);   
                         setTimeout(function(){
-                            wave.setAttribute('position', {x: 0, y: 10, z: -1});
+                            wave.setAttribute('position', {x: 0, y: 10, z: -1.6});
                             spawner1.gameStarted();
                             spawner2.gameStarted();
                             spawner1.nextLevel(totalEnemies);
@@ -307,7 +306,7 @@
                             AFRAME.scenes[0].emit('gameStarted', {});
                         }  else if (entityId == "shoottoreset") {
                             let shootToReset = document.querySelector("#shoottoreset");
-                            shootToReset.parentNode.removeChild(shootToReset);
+                            shootToReset.setAttribute("position", "0 10 -1.6");
 
                             let worldScene = document.querySelector("a-entity[world]");
                             worldScene.removeChild(worldScene.querySelector("a-entity[monsters]"));
@@ -385,9 +384,13 @@
                             }
                         }
                         if (state.playerHealth <= 0){
+                            var spawner1 = document.querySelector('#spawner1').components.spawner;
+                            var spawner2 = document.querySelector('#spawner2').components.spawner;
+                            spawner1.gameStopped();
+                            spawner2.gameStopped();
                             AFRAME.scenes[0].emit('gameLost');
                             let shootToReset = document.querySelector("#shoottoreset");
-                            shootToReset.setAttribute("position", "0 1.5 -1");
+                            shootToReset.setAttribute("position", "0 1 -1.6");
                             shootToReset.setAttribute("class", "collidable");
                         }
                     },
@@ -797,12 +800,12 @@
 
 			<a-entity vehicle="isVisiblePos: false" position="0 0 0" rotation="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
-					<a-cursor position="0 0 -0.2" cursor-selector></a-cursor>
+					<a-cursor position="0 0 -1.5" geometry="radiusInner: 0.05; radiusOuter: 0.08" material="color: blue" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
 
                 <!-- Camera image -->
-				<a-image backdrop src="models/bunny_screen.png" width="38.55" height="21.68" position="0 1 -8"></a-image>
+				<a-image backdrop src="" width="38.55" height="21.68" position="0 1 -8" material="color: black"></a-image>
 
                 <!-- Monitor -->
                 <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
@@ -831,39 +834,39 @@
                     <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
                     <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
-                    <a-plane width="1" height="0.5" material="color: #000000; opacity: 0.35; transparent: true" position="-0.8 0.682 0.0001">
-                        <a-text id="stat-msg" bind__value="value: message" color="#00fdff" opacity="0.35" transparent="true" position="-0.43336 0.16424 0.0076" width="0.8" color="#faffef"></a-text>
+                    <a-plane width="1" height="0.5" material="color: #ccffff; opacity: 0.2; transparent: true" position="-0.8 0.682 0.0001">
+                        <a-text id="stat-msg" bind__value="value: message" color="#33ffcc" opacity="0.35" transparent="true" position="-0.433 0.13 0" width="0.9" wrap-count="20" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
 
 
                 <!-- Game Start -->
-                <a-entity id="shoottostart" position="0 1.5 -1">
-                    <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
+                <a-entity id="shoottostart" position="0 1 -1.6">
+                    <a-entity id="start-bunny" class="collidable" id="start" gltf-model="#zombieBunny" scale="0.005 0.005 0.005"  play-all-model-animations></a-entity>
                     <!-- <a-image src="#shootme" height="0.4" width="5.6" scale="0.3" position="0 0.6 -0.18"></a-image> -->
-                    <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 0.6 -0.18"></a-image>
+                    <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
                     <!-- <a-image src="#shootme5" height="0.4" width="5.8" scale="0.25" position="0 0.6 -0.18"></a-image> -->
                 </a-entity>
 
                 <!-- Wave Alert -->
-                <a-entity id="waveAlert" position="0 10 -1">
-                    <a-image src="#wave1" height="0.4" width="5.2" scale="0.3" position="0 0.6 -0.18"></a-image>
-
+                <a-entity id="waveAlert" position="0 10 -1.6">
+                    <a-image src="#wave1" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
                 </a-entity>
 
                 <!-- Game End -->
-                <a-entity id="shoottoreset" position="0 4.5 -1" >
-                    <a-entity id="reset-game" class="collidable"  gltf-model="#zombieBunny" scale="0.003 0.003 0.003"  play-all-model-animations></a-entity>
-                    <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 0.6 -0.18"></a-image>
+                <a-entity id="shoottoreset" position="0 10 -1.6" >
+                    <a-entity id="reset-game" class="collidable"  gltf-model="#zombieBunny" scale="0.005 0.005 0.005"  play-all-model-animations></a-entity>
+                    <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
                 </a-entity>
 
 
                 <a-entity 
-                id = "explosion"
-                position="0 1 -0.5"
-                trigger
-                particleplayer="on:particleplayerstart; color:red; src: #particlesJson; img: #particleTex; dur: 4000; count: 50%; scale: 1; pscale: 3; interpolate: true; shader: standard; poolSize: 20"></a-entity>
+                    id = "explosion"
+                    position="0 1 -0.5"
+                    trigger
+                    particleplayer="on:particleplayerstart; color:red; src: #particlesJson; img: #particleTex; dur: 4000; count: 50%; scale: 1; pscale: 3; interpolate: true; shader: standard; poolSize: 20">
+                </a-entity>
 
 
                 <!-- Interior decor -->
@@ -876,12 +879,12 @@
 
 			<a-entity world position="0 0 0">
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
-                <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
+                <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, -5"></a-entity>
                 <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" >
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
-                <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
+                <a-entity spawner="monster: #monster2" id="spawner2" position="3, 0.0001, -5"></a-entity>
                 <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" >
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
