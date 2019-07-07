@@ -289,7 +289,7 @@
                         let entityId = action.entityId;
                         if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
                             AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
-                        } else if (entityId == "start-bunny") {
+                        } else if (entityId == "shoottostart") {
                             let shootToStart = document.querySelector("#shoottostart");
                             shootToStart.parentNode.removeChild(shootToStart);
 
@@ -661,7 +661,7 @@
                     // Use events to figure out what raycaster is listening so we don't have to
                     // hardcode the raycaster.
                     this.el.addEventListener('raycaster-intersection', evt => {
-                        this.enemyId = evt.detail.els[0].id;
+                        this.enemyId = evt.detail.els[0].parentEl.id;
                         sceneEl.emit('addEnemiesRayHit', {id: this.enemyId});
                     });
                     this.el.addEventListener('raycaster-intersection-cleared', evt => {
@@ -850,12 +850,12 @@
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-1, 0.0001, -3"></a-entity>
                 <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" >
-                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                    <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="2, 0.0001, -3"></a-entity>
                 <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" >
-                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                    <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity monsters></a-entity>
