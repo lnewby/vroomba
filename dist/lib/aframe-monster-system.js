@@ -117,29 +117,12 @@
         },
 
         unregisterMonster: function (el) {
-            console.log("Monster: removed");
-            
-            
-
-            // TO DO: animate explode
-            var position = el.getAttribute('position');
-            console.log(position);
-            sceneEl.systems.trigger.trigger(position);
+            let position = this.el.getAttribute('position');
+            let explosion = document.querySelector('#explosion');
+            explosion.emit('particleplayerstart',{position: position});
             document.querySelector('a-entity[monsters]').removeChild(el);
-            
-            
+            console.log("Monster: removed");
         }
-    });
-
-    AFRAME.registerSystem('trigger', {
-      init: function() {
-      },
-
-      trigger: function(monsterPosition) {
-        //console.log("hello");
-        var el = document.querySelector('#explosion');
-        el.emit('particleplayerstart',{position:monsterPosition});
-      }
     });
 
     AFRAME.registerComponent('spawner', {

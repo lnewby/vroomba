@@ -39,7 +39,7 @@
             var url="http://localhost:8080/getredisdata";
 
             function worker () {
-                var result = fetch(url).then(response => response.json())
+                fetch(url).then(response => response.json())
                     .then( (result) => {
                         //console.log('success:', result);
                         let j = JSON.parse(result[1]).data;
@@ -52,11 +52,14 @@
                     })
                     .catch(error => console.log('error:', error));
 
-                if (result.PromiseValue)
-                    setTimeout("worker ()", 11);
+                setTimeout("worker ()", 11);
             }
 
-            worker ();
+            fetch(url).then(response => response.json())
+                .then( (result) => {
+                    worker ();
+                })
+                .catch(error => console.log('error:', error));
 
 
             AFRAME.registerComponent('vehicle', {
@@ -255,8 +258,8 @@
                         let totalEnemies = state.levelMap[state.currentLevel].totalEnemies;
                         
                         var wave = document.querySelector('#waveAlert');
+                        wave.querySelector('a-image').setAttribute('src','#wave'+state.currentLevel);
                         wave.setAttribute('position', {x: 0, y: 1, z: -1.6});
-                        wave.querySelector('a-image').setAttribute('src','#wave'+state.currentLevel);   
                         setTimeout(function(){
                             wave.setAttribute('position', {x: 0, y: 10, z: -1.6});
                             spawner1.gameStarted();
@@ -797,7 +800,7 @@
             <a-entity sound="src: #s-dead; poolSize: 10"></a-entity>
 
 
-			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" position="0 0.2 0 "></a-entity>
+			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" material="opacity: 0; transparent: true"position="0 0.2 0 "></a-entity>
 
             <!-- Vive controller weapon -->
             <a-entity weapon-trigger laser-controls="hand: right; model: false" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
@@ -806,12 +809,12 @@
 
 			<a-entity vehicle="isVisiblePos: false" position="0 0 0" rotation="0 0 0">
 				<a-entity camera="active: true" position="0 1.6 0" look-controls hmdEnabled="false">
-					<a-cursor position="0 0 -1.5" geometry="radiusInner: 0.05; radiusOuter: 0.08" material="color: blue" cursor-selector></a-cursor>
+					<a-cursor position="0 0 -1.5" geometry="radiusInner: 0.05; radiusOuter: 0.08" cursor-selector></a-cursor>
 					<a-entity id="player-debug" text="value: (x, y, z); align: center; color: blue; width: 0.2; wrapCount: 20" position="0 -0.13 -0.2"></a-entity>
 				</a-entity>
 
                 <!-- Camera image -->
-				<a-image backdrop src="" width="38.55" height="21.68" position="0 1 -8" material="color: black"></a-image>
+				<a-image backdrop src="" width="38.55" height="21.68" position="0 1 -8"></a-image>
 
                 <!-- Monitor -->
                 <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
@@ -841,7 +844,7 @@
                     <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
                     <a-plane width="1" height="0.5" material="color: #ccffff; opacity: 0.2; transparent: true" position="-0.8 0.682 0.0001">
-                        <a-text id="stat-msg" bind__value="value: message" color="#33ffcc" opacity="0.35" transparent="true" position="-0.433 0.13 0" width="0.9" wrap-count="20" color="#faffef"></a-text>
+                        <a-text id="stat-msg" bind__value="value: message" color="#33ffcc" position="-0.433 0.13 0" width="0.9" wrap-count="20" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
@@ -870,7 +873,6 @@
                 <a-entity 
                     id = "explosion"
                     position="0 1 -0.5"
-                    trigger
                     particleplayer="on:particleplayerstart; color:red; src: #particlesJson; img: #particleTex; dur: 4000; count: 50%; scale: 1; pscale: 3; interpolate: true; shader: standard; poolSize: 20">
                 </a-entity>
 
@@ -884,14 +886,14 @@
 			</a-entity>
 
 			<a-entity world position="0 0 0">
-                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" position="0 0.2 0"></a-entity>
+                <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" material="opacity: 0; transparent: true" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, -5"></a-entity>
-                <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" sound="src: #s-hit; volume: 5">
+                <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" sound="src: #s-hit; volume: 10">
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="3, 0.0001, -5"></a-entity>
-                <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" sound="src: #s-hit; volume: 5">
+                <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" sound="src: #s-hit; volume: 10">
                     <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
