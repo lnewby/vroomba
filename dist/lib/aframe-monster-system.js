@@ -145,10 +145,10 @@
         // Circular area where monsters should spawn
 
         schema: {
-            shouldSpawn: {type: 'boolean', default: false},
+            gameStarted: {type: 'boolean', default: false},
             spawnRadius: {type: 'number', default: 1},
             spawnPoolSize: {type: 'number', default: 5},
-            spawnDelay: {type: 'number', default: 900},
+            spawnRate: {type: 'number', default: 300},
 
             monster: {type: 'selector', default: '#monster'},
             monsterType: {type: 'string'}
@@ -156,15 +156,20 @@
 
         init: function () {
             this.timer = 0;
+            this.monsterCounter = 0;
             this.spawnPosition = this.el.object3D.position;
             this.registerSpawningZone();
             console.log(this.spawnPosition);
         },
 
+        gameStarted: function() {
+            this.data.gameStarted = true;
+
+        },
+
         nextLevel: function(poolSize){
+            this.monsterCounter = 0;
             this.data.spawnPoolSize = poolSize;
-            this.data.shouldSpawn = true;
-            this.el.sceneEl.emit("updateMessage", {message: "10 seconds until the fluffle spawns!"})
         },
 
         registerSpawningZone: function() {
@@ -186,18 +191,11 @@
         },
 
         tick: function () {
-            if (this.data.shouldSpawn){
-                if (this.timer == this.data.spawnDelay) {
-                    this.el.sceneEl.emit("updateMessage", {message: "The fluffle has spawned!"})
-                    this.spawn(this.data.monster);
-                    this.data.shouldSpawn = false;
-                    this.timer = 0;
-                } else {
-                    let seconds = 10 - (this.timer / 90).toFixed(0);
-                    this.el.sceneEl.emit("updateMessage", {message: seconds + " seconds until the fluffle spawns!"})
-                }
-                this.timer++;
+            if (this.timer == this.data.spawnRate) {
+                this.spawn(this.data.monster);
+                this.timer = 0;
             }
+            this.timer++;
         },
 
         spawningCoordinates: function() {
@@ -213,15 +211,15 @@
 
         spawn: function () {
 
-            console.log(this.monsterCounter + "/" + this.data.spawnPoolSize)
-            for (let i = 0; i < this.data.spawnPoolSize; i++) {
+            if (this.data.gameStarted && (this.monsterCounter < this.data.spawnPoolSize)) {
 
+                this.monsterCounter++;
                 //console.group("Monster: spawning monster " + this.data.monster.getAttribute('monster').monsterType + " " + this.monsterCounter + "/" + this.data.spawnPoolSize);
 
                 this.spawningCoordinates(this.data.spawnRadius);
                 sceneEl.systems.monster.createMonster(this.data.monster, this.monsterPosition);
 
-                console.log("Spawn position: " + JSON.stringify(this.monsterPosition));
+                //console.log("Spawn position: " + JSON.stringify(this.monsterPosition));
                 //console.groupEnd();
             }
         }
