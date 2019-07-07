@@ -38,7 +38,6 @@
             // });
 
             healthBar.setAttribute('position', {x: 0, y: this.data.healthBarOffset, z: 0});
-            healthBar.setAttribute('position', {x: 0, y: 0.727, z: 0});
 
             this.el.addEventListener('model-loaded', this.update.bind(this));
         },
@@ -77,7 +76,7 @@
                 monster.setAttribute('id', monster_id);
                 monster.setAttribute('class', 'collidable');
                 monster.setAttribute('position', {x: loc.x, y: loc.y, z: loc.z});
-                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 2.5});
+                monster.setAttribute('follow', {target: '#player', speed: 0.2, space: 2.5, hitDamage: 5});
                 monster.setAttribute('visible', true);
                 //console.log('Monster ID: MM_' + monster_id);
 
@@ -233,6 +232,7 @@
             target: {type: 'selector'},
             speed: {type: 'number'},
             space: {type: 'number', default: 1},
+            hitDamage: {type: 'number', default: 1}
         },
 
         init: function () {
@@ -260,10 +260,7 @@
             if (distance < bufferZone) {
                 if (this.playerDamageTracker == this.el.getAttribute('monster').damageRate) {
                     //console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
-
-                    // this.el.sceneEl.emit('playerHit', {damage: 5});
-                    this.el.sceneEl.emit('playerHit', {damage: 5, enemyId: this.el.id});
-
+                    this.el.sceneEl.emit('playerHit', {damage: this.data.hitDamage, enemyId: this.el.id});
                     this.playerDamageTracker = 0;
                 }
                 else {
