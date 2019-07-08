@@ -117,11 +117,11 @@
         },
 
         unregisterMonster: function (el) {
-            let position = this.el.getAttribute('position');
             let explosion = document.querySelector('#explosion');
-            explosion.emit('particleplayerstart',{position: position});
+            explosion.emit('particleplayerstart', {});
+
+            console.log("Monster: removed " + el.components.monster.el.id);
             document.querySelector('a-entity[monsters]').removeChild(el);
-            console.log("Monster: removed");
         }
     });
 

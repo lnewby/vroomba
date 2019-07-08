@@ -282,7 +282,7 @@
                         AFRAME.scenes[0].emit('entityHit', {entityId: action.entityId});
 
                         // Provide haptic feedback for fired weapon
-                        if (navigator.getGamepads) {
+                        if (navigator.getGamepads && AFRAME.scenes[0].is('vr-mode')) {
                             for (let gamepad of navigator.getGamepads()) {
                                 gamepad.hapticActuators[0].pulse(1, 50);
                             }
@@ -386,7 +386,7 @@
                             sceneEl.systems.monster.onHit(enemyEl,1000);
 
                             // Provide haptic feedback when player is taking damage
-                            if (navigator.getGamepads) {
+                            if (navigator.getGamepads && AFRAME.scenes[0].is('vr-mode')) {
                                 for (let gamepad of navigator.getGamepads()) {
                                     gamepad.hapticActuators[0].pulse(2, 500);
                                 }
@@ -754,7 +754,7 @@
 		<a-scene id="scene" physics vroomba-scene-setup>
         <!-- fog="color: #000; near: 5; far: 10;" -->
             <a-assets>
-                <a-asset-item id="particlesJson" src="models/particles-fireworks.json"></a-asset-item>
+                <a-asset-item id="particles-fireworks" src="models/particles-fireworks.json"></a-asset-item>
                 <img src="models/sprite.png" id="particleTex">
       
                 <a-asset-item id="wall-panel-obj" src="models/Wall Panel 1.obj"></a-asset-item>
@@ -796,8 +796,8 @@
 
             <a-sky color="black" ></a-sky>
 
-            <a-entity sound="src: #s-theme; poolSize: 10"></a-entity>
-            <a-entity sound="src: #s-dead; poolSize: 10"></a-entity>
+            <a-entity sound="src: #s-theme; loop: true"></a-entity>
+            <a-entity sound="src: #s-dead;"></a-entity>
 
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" material="opacity: 0; transparent: true"position="0 0.2 0 "></a-entity>
@@ -869,13 +869,12 @@
                     <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
                 </a-entity>
 
-
+                <!-- particle effects -->
                 <a-entity 
                     id = "explosion"
                     position="0 1 -0.5"
-                    particleplayer="on:particleplayerstart; color:red; src: #particlesJson; img: #particleTex; dur: 4000; count: 50%; scale: 1; pscale: 3; interpolate: true; shader: standard; poolSize: 20">
+                    particleplayer="on:particleplayerstart; color:red; src: #particles-fireworks; img: #particleTex; dur: 4000; count: 50%; scale: 1; pscale: 3; interpolate: true; shader: standard; poolSize: 20">
                 </a-entity>
-
 
                 <!-- Interior decor -->
                 <a-entity obj-model="obj: #wooden-box-obj; mtl: #wooden-box-mtl" scale="0.3 0.3 0.3" position="-0.04 0 2.204" rotation="0 90 0"></a-entity>
