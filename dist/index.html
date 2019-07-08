@@ -406,7 +406,10 @@
                         }
                     },
                     weaponChanged: function(state, action){
+                        let reloadSound = document.querySelector("#s-reload");
+                        reloadSound.components.sound.playSound();
                         AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
+                        state.message = "Changed weapon to " + action.effect;
                     },
                     addEnemiesRayHit: function(state, action){
                         let id = action.id;
@@ -431,9 +434,6 @@
                     const sceneEl = document.querySelector('a-scene');
 
                     window.onkeyup = function(e) {
-                        
-                        let reloadSound = document.querySelector("#s-reload");
-                        reloadSound.components.sound.playSound();
 
                         if (e.key == 1) {
                             //sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
