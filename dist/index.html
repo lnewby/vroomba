@@ -612,7 +612,15 @@
 
                 moveMonstersToTarget: function( target, monsterIds ){
                     let targetPosition = target.getAttribute('position');
+                    var carrot = document.createElement('a-entity');
+                    carrot.setAttribute('carrot', '');
+                    carrot.setAttribute('geometry', 'primitive: sphere; radius: 0.4');
+                    carrot.setAttribute('material', 'color: orange');
+                    carrot.setAttribute('position', {x: 0, y: 0.5, z: 0});
+
                     console.log(targetPosition);
+                    target.appendChild(carrot);
+
                     for (let i = 0; i < monsterIds.length; i++){
                         var id = monsterIds[i];
                         if (id == target.id){
@@ -628,6 +636,10 @@
                             el.setAttribute('animation', 'property: position; to: ' + newPos.x + " " + newPos.y  + " " + newPos.z);
                         }
                     }
+
+                    setTimeout( function() {
+                        target.removeChild(carrot);
+                    }, 3000, target, carrot);
                 },
 
                 blastMonstersAwayFromTarget: function( player, target, monsterIds ){
