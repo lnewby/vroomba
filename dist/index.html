@@ -276,10 +276,12 @@
                         state.enemyIds.push(enemyId);
                     },
                     weaponFired: function(state, action) {
+
                         for (let id of state.enemiesRayHitIds) {
                             AFRAME.scenes[0].emit('entityHit', {entityId: id});
                         }
                         AFRAME.scenes[0].emit('entityHit', {entityId: action.entityId});
+                        AFRAME.scenes[0].systems.weapon.initiateCooldown();
 
                         // Provide haptic feedback for fired weapon
                         if (navigator.getGamepads && AFRAME.scenes[0].is('vr-mode')) {
@@ -293,7 +295,7 @@
                         let timeLeft = action.timeLeft;
                         let bars = "";
                         for (let i = 0; i < timeLeft; i++){
-                            bars += "|";
+                            bars += "||";
                         }
                         if (effect == "push"){
                             state.pushWeaponCooldownText = "PUSH CD: " + bars;
@@ -339,7 +341,6 @@
                             }
                         }
 
-                        AFRAME.scenes[0].systems.weapon.initiateCooldown();
                     },
                     enemyDefeated: function(state, action){
                         let enemyId = action.enemyId;
@@ -355,6 +356,7 @@
       //                       });
 						// }
 						// state.defeatedEnemyIds.push(enemyId);
+                        state.enemyIds.pop(enemyId);
                         state.enemiesAlive -= 1;
                         state.totalEnemiesDefeated += 1;
                         state.enemiesDefeated += 1;
@@ -429,6 +431,10 @@
                     const sceneEl = document.querySelector('a-scene');
 
                     window.onkeyup = function(e) {
+                        
+                        let reloadSound = document.querySelector("#s-reload");
+                        reloadSound.components.sound.playSound();
+
                         if (e.key == 1) {
                             //sceneEl.emit('enemyHit', {enemyId: 0, damage: 10});
                             sceneEl.emit('gameStarted');
@@ -460,65 +466,73 @@
                 init: function () {
                     this.timer = 0;
                     this.currentWeaponEffect = "normal";
-                    this.shouldCheckCooldowns = false;
+                    //this.shouldCheckCooldowns = false;
                     this.weaponInfo = {
                         push: {
                             effect: "push",
                             cooldown: 5,
                             damage: 5,
                             countdown: 0,
-                            secondsTimer: 0
+                            // secondsTimer: 0
                         },
                         pull: {
                             effect: "pull",
                             cooldown: 5,
                             damage: 2,
                             countdown: 0,
-                            secondsTimer: 0
+                            // secondsTimer: 0
                         },
                         splash: {
                             effect: "splash",
                             cooldown: 0,
                             damage: 5,
                             countdown: 0,
-                            secondsTimer: 0
+                            // secondsTimer: 0
                         },
                         snipe: {
                             effect: "snipe",
                             cooldown: 0,
                             damage: 10,
                             countdown: 0,
-                            secondsTimer: 0
+                            // secondsTimer: 0
                         },
                         normal: {
                             effect: "normal",
                             cooldown: 0,
                             damage: 8,
                             countdown: 0,
-                            secondsTimer: 0
+                            // secondsTimer: 0
                         }
                     };
                     this.weaponsWithCooldowns = [this.weaponInfo.push, this.weaponInfo.pull];
                 },
 
                 tick: function () {
-                    if (this.timer % 9 == 0) {
-                        let continueChecking = false;
-                        if (this.shouldCheckCooldowns) {
-                            for (let i = 0; i < this.weaponsWithCooldowns.length; i++){
-                                let weapon = this.weaponsWithCooldowns[i];
-                                if (weapon.countdown > 0) {
-                                    continueChecking = true;
-                                    weapon.secondsTimer += 0.2;
-                                    if (weapon.secondsTimer >= 1){
-                                        weapon.countdown--;
-                                        weapon.secondsTimer = 0;
-                                        sceneEl.emit("updateWeaponCooldown", {effect: weapon.effect, timeLeft: weapon.countdown});
-                                    }
-                                }
-                            }
-                            this.shouldCheckCooldowns = continueChecking;
+                    if (this.timer == 60) {
+
+                        // let continueChecking = false;
+                        // if (this.shouldCheckCooldowns) {
+                        //     for (let i = 0; i < this.weaponsWithCooldowns.length; i++){
+                        //         let weapon = this.weaponsWithCooldowns[i];
+                        //         if (weapon.countdown > 0) {
+                        //             continueChecking = true;
+                        //             weapon.secondsTimer += 0.2;
+                        //             if (weapon.secondsTimer >= 1){
+                        //                 weapon.countdown--;
+                        //                 weapon.secondsTimer = 0;
+                        //                 sceneEl.emit("updateWeaponCooldown", {effect: weapon.effect, timeLeft: weapon.countdown});
+                        //             }
+                        //         }
+                        //     }
+                        //     this.shouldCheckCooldowns = continueChecking;
+                        // }
+                        for (let i = 0; i < this.weaponsWithCooldowns.length; i++) {
+                            let weapon = this.weaponsWithCooldowns[i];
+                            weapon.countdown = (weapon.countdown > 0) ? weapon.countdown - 1 : 0;
+                            sceneEl.emit("updateWeaponCooldown", {effect: weapon.effect, timeLeft: weapon.countdown});
                         }
+
+                        this.timer = 0;
                     }
                     this.timer++;
                 },
@@ -531,25 +545,32 @@
                     return false
                 },
 
-                hasCooldown(effect){
-                  if (effect == "push" || effect == "pull") {
-                      return true;
-                  }
-                  return false;
-                },
+                // hasCooldown(effect){
+                //   if (effect == "push" || effect == "pull") {
+                //       return true;
+                //   }
+                //   return false;
+                // },
 
                 initiateCooldown: function(){
+                    // if (this.isOnCooldown(this.currentWeaponEffect)) {
+                    //     console.log(this.currentWeaponEffect + " weapon still recharging");
+                    // }
+                    // if (this.hasCooldown(this.currentWeaponEffect) && !this.isOnCooldown(this.currentWeaponEffect)) {
+                    //     this.weaponInfo[this.currentWeaponEffect].countdown = this.weaponInfo[this.currentWeaponEffect].cooldown;
+                    //     sceneEl.emit("updateWeaponCooldown", {
+                    //         effect: this.currentWeaponEffect,
+                    //         timeLeft: this.weaponInfo[this.currentWeaponEffect].cooldown
+                    //     });
+                    //     this.shouldCheckCooldowns = true;
+                    // }
+
                     if (this.isOnCooldown(this.currentWeaponEffect)) {
-                        console.log(this.currentWeaponEffect + " gun still recharging");
-                    }
-                    if (this.hasCooldown(this.currentWeaponEffect) && !this.isOnCooldown(this.currentWeaponEffect)) {
+                        console.log("Weapon : " + this.currentWeaponEffect + "[countdown: " + this.weaponInfo[this.currentWeaponEffect].countdown + "]");
+                    } else {
                         this.weaponInfo[this.currentWeaponEffect].countdown = this.weaponInfo[this.currentWeaponEffect].cooldown;
-                        sceneEl.emit("updateWeaponCooldown", {
-                            effect: this.currentWeaponEffect,
-                            timeLeft: this.weaponInfo[this.currentWeaponEffect].cooldown
-                        });
-                        this.shouldCheckCooldowns = true;
                     }
+
                 },
 
                 weaponChanged: function ( weaponEffect ) {
@@ -564,8 +585,6 @@
                             this.blastMonstersAwayFromTarget(player, target, enemyIds);
                         }
                         this.dealDamage(player, target, enemyIds);
-                    } else {
-                        console.log(this.currentWeaponEffect + " gun still recharging");
                     }
                 },
 
@@ -791,6 +810,7 @@
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
                 <a-sound id="s-hit" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
                 <a-sound id="s-dead" src="sounds/Enemy_sounds/goatOnly.m4a" preload="auto"></a-sound>
+                <a-sound id="s-reload" src="sounds/Weapon_sounds/shotgun-reload-old_school-RA_The_Sun_God-580332022.mp3" preload="auto"></a-sound>
 
             </a-assets>
 
@@ -798,13 +818,13 @@
 
             <a-entity sound="src: #s-theme; loop: true"></a-entity>
             <a-entity sound="src: #s-dead;"></a-entity>
-
+            <a-entity sound="src: #s-reload;"></a-entity>
 
 			<a-entity xmitter id="pos-transmit" geometry="primitive: cone; height: 0.4; radius-bottom: 0.2" material="opacity: 0; transparent: true"position="0 0.2 0 "></a-entity>
 
             <!-- Vive controller weapon -->
-            <a-entity weapon-trigger laser-controls="hand: right; model: false" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
-            <!-- <a-entity weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
+            <a-entity weapon weapon-trigger laser-controls="hand: right; model: false" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity>
+            <!-- <a-entity weapon weapon-trigger laser-controls="hand: left" line="color: red; opacity: 0.75" raycaster="objects: .collidable"></a-entity> -->
             <a-entity id="weapon-model" obj-model="obj: #weapon-obj" material="src: #weapon-green-mat"></a-entity>
 
 			<a-entity vehicle="isVisiblePos: false" position="0 0 0" rotation="0 0 0">
