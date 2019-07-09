@@ -365,19 +365,20 @@
                         state.totalEnemiesDefeated += 1;
                         state.enemiesDefeated += 1;
 
-                        if (state.currentLevel < state.endLevel) {
+                        if (state.enemiesAlive <= 0 && state.playerHealth > 0) {
                             // state.levelMap[state.currentLevel].enemiesDefeated += 1;
                             // let levelObj = state.levelMap[state.currentLevel];
                             // if (levelObj.enemiesDefeated >= levelObj.totalEnemies * noSpawner) {
                             //     state.currentLevel += 1;
                             //     AFRAME.scenes[0].emit('nextLevel');
                             // }
-                            if (state.enemiesAlive <= 0 && state.playerHealth > 0) {
+                            
+                            if (state.currentLevel < state.endLevel) {
                                 state.currentLevel += 1;
                                 AFRAME.scenes[0].emit('nextLevel');
+                            } else {
+                                AFRAME.scenes[0].emit('gameWon');
                             }
-                        } else {
-                            AFRAME.scenes[0].emit('gameWon');
                         }
                     },
                     killWave: function (state, action) {
