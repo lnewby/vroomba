@@ -220,6 +220,7 @@
         schema: {
             target: {type: 'selector'},
             targetDamage: {type: 'boolean', default: true},
+            reverse: {type: 'boolean', default: false},
             speed: {type: 'number', default: 1},
             space: {type: 'number', default: 1},
             hitDamage: {type: 'number', default: 1}
@@ -261,11 +262,18 @@
             directionVec3.y *= factor * (timeDelta / 1000);
             directionVec3.z *= factor * (timeDelta / 1000);
 
-            this.el.setAttribute('position', {
-                x: currentPosition.x + directionVec3.x,
-                y: currentPosition.y + directionVec3.y,
-                z: currentPosition.z + directionVec3.z
-            });
+            if (this.data.reverse)
+                this.el.setAttribute('position', {
+                    x: currentPosition.x - directionVec3.x,
+                    y: currentPosition.y - directionVec3.y,
+                    z: currentPosition.z - directionVec3.z
+                });
+            else
+                this.el.setAttribute('position', {
+                    x: currentPosition.x + directionVec3.x,
+                    y: currentPosition.y + directionVec3.y,
+                    z: currentPosition.z + directionVec3.z
+                });
 
         }
     });
