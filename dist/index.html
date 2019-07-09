@@ -727,15 +727,27 @@
         //                 }
         //             }
 
-                    var el = document.querySelector('#' + target.id);
-                    if (el != null) {
-                        el.setAttribute('follow', {reverse: true, speed: 3, space: 0.8});
+                    let targetPosition = target.getAttribute('position');
+
+                    for (let i = 0; i < monsterIds.length; i++) {
+                        var id = monsterIds[i];
+                        var el = document.querySelector('#' + id);
+                        if (el != null) {
+                            var elPosition = el.getAttribute('position');
+                            let d = Math.sqrt(((targetPosition.x - elPosition.x)*(targetPosition.x - elPosition.x))
+                                + ((targetPosition.z - elPosition.z)*(targetPosition.z - elPosition.z)));
+                            if (d < 1)
+                                el.setAttribute('follow', {reverse: true, speed: 3, space: 0.8});
+                        }
                     }
 
                     setTimeout( function() {
-                        var el = document.querySelector('#' + target.id);
-                        if (el != null) {
-                            el.setAttribute('follow', {reverse: false, speed: 0.2, space: 2.5});
+                        for (let i = 0; i < monsterIds.length; i++) {
+                            var id = monsterIds[i];
+                            var el = document.querySelector('#' + id);
+                            if (el != null) {
+                                el.setAttribute('follow', {reverse: false, speed: 0.2, space: 2.5});
+                            }
                         }
                     }, 1000, target);
                 },
