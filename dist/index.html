@@ -214,6 +214,7 @@
 		            defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     endLevel: 5,
+                    weaponId: 0,
                     levelMap: {
                         1: {
                             enemiesDefeated: 0,
@@ -307,7 +308,7 @@
                         let systems = AFRAME.scenes[0].systems;
                         let entityId = action.entityId;
                         if (entityId == "pull" || entityId == "push" || entityId == "splash" || entityId == "snipe") {
-                            AFRAME.scenes[0].emit('weaponChanged', {effect: entityId});
+                            AFRAME.scenes[0].emit('weaponChanged', {direction: 1});
                         } else if (entityId == "shoottostart") {
                             let shootToStart = document.querySelector("#shoottostart");
                             shootToStart.parentNode.removeChild(shootToStart);
@@ -406,10 +407,18 @@
                         }
                     },
                     weaponChanged: function(state, action){
+                        let weaponType = ['pull', 'push', 'splash', 'snipe', 'normal'];
                         let reloadSound = document.querySelector("#s-reload");
                         reloadSound.components.sound.playSound();
-                        AFRAME.scenes[0].systems.weapon.weaponChanged(action.effect);
-                        state.message = "Changed weapon to " + action.effect;
+                        
+                        state.weaponId += action.direction;
+
+                        // Bound check to cycle through weapon types
+                        if (state.weaponId < 0) { state.weaponId = weaponType.length-1; }
+                        else if (state.weaponId > weaponType.length-1) { state.weaponId = 0; }
+
+                        console.log(`Changed weapon to: ${weaponType[state.weaponId]}`);
+                        AFRAME.scenes[0].systems.weapon.weaponChanged(weaponType[state.weaponId]);
                     },
                     addEnemiesRayHit: function(state, action){
                         let id = action.id;
@@ -443,15 +452,9 @@
                         } else if (e.key == 3) {
                             sceneEl.emit('playerHit', {damage: 5});
                         } else if (e.key == 4) {
-                            sceneEl.emit('weaponChanged', {effect: "pull"});
+                            sceneEl.emit('weaponChanged', {direction: 1});
                         } else if (e.key == 5) {
-                            sceneEl.emit('weaponChanged', {effect: "push"});
-                        } else if (e.key == 6) {
-                            sceneEl.emit('weaponChanged', {effect: "splash"});
-                        } else if (e.key == 7) {
-                            sceneEl.emit('weaponChanged', {effect: "snipe"});
-                        } else if (e.key == 8) {
-                            sceneEl.emit('weaponChanged', {effect: "normal"});
+                            sceneEl.emit('weaponChanged', {direction: -1});
                         } else if (e.key == 9) {
                             sceneEl.emit('updateMessage', {message: "TEST"});
                         }
@@ -473,6 +476,7 @@
                             cooldown: 5,
                             damage: 5,
                             countdown: 0,
+                            skinId: "#weapon-red-mat"
                             // secondsTimer: 0
                         },
                         pull: {
@@ -480,6 +484,7 @@
                             cooldown: 5,
                             damage: 2,
                             countdown: 0,
+                            skinId: "#weapon-green-mat"
                             // secondsTimer: 0
                         },
                         splash: {
@@ -487,6 +492,7 @@
                             cooldown: 0,
                             damage: 5,
                             countdown: 0,
+                            skinId: "#weapon-blue-mat"
                             // secondsTimer: 0
                         },
                         snipe: {
@@ -494,6 +500,7 @@
                             cooldown: 0,
                             damage: 10,
                             countdown: 0,
+                            skinId: "#weapon-gold-mat"
                             // secondsTimer: 0
                         },
                         normal: {
@@ -501,6 +508,7 @@
                             cooldown: 0,
                             damage: 8,
                             countdown: 0,
+                            skinId: "#weapon-green-mat"
                             // secondsTimer: 0
                         }
                     };
@@ -574,7 +582,9 @@
                 },
 
                 weaponChanged: function ( weaponEffect ) {
+                    let weapon = document.querySelector('#weapon-model');
                     this.currentWeaponEffect = weaponEffect;
+                    weapon.setAttribute('material', 'src: '+this.weaponInfo[weaponEffect].skinId);
                 },
 
                 doEffect: function (player, target, enemyIds) {
@@ -677,7 +687,7 @@
                                 var newPos = {
                                     x: newX,
                                     y: elPosition.y,
-                                    z: newZ,
+                                    z: newZ
                                 };
                                 el.setAttribute('animation', 'property: position; to: ' + newPos.x + " " + newPos.y  + " " + newPos.z + "; dur: 500");
                             }
@@ -735,6 +745,15 @@
                             }
                         }
                     });
+
+                    this.el.addEventListener('trackpaddown', () => {
+                        sceneEl.emit('weaponChanged', {direction: 1});
+                    });
+
+                    this.el.addEventListener('trackpadup', () => {
+                        sceneEl.emit('weaponChanged', {direction: -1});
+                    });
+
                     this.weapon = document.querySelector('#weapon-model');
                 },
 
