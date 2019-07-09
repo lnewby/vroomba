@@ -171,7 +171,6 @@
                 primitive: 'circle',
                 radius: this.data.spawnRadius
             });
-            this.spawningZone.setAttribute('color', 'red');
             this.spawningZone.setAttribute('position', this.spawnPosition);
             this.spawningZone.setAttribute('rotation', {x: -90, y: 0, z: 0});
             this.el.sceneEl.appendChild(this.spawningZone);
@@ -220,7 +219,8 @@
 
         schema: {
             target: {type: 'selector'},
-            speed: {type: 'number'},
+            targetDamage: {type: 'boolean', default: true},
+            speed: {type: 'number', default: 1},
             space: {type: 'number', default: 1},
             hitDamage: {type: 'number', default: 1}
         },
@@ -248,7 +248,9 @@
             // Monster hit damage player
             if (distance < bufferZone) {
                 // console.log("Monster: player hit (" + this.el.getAttribute('monster').damagePt + ") by " + this.el.id);
-                this.el.sceneEl.emit('playerHit', {damage: this.data.hitDamage, enemyId: this.el.id});
+                if (this.data.targetDamage)
+                    this.el.sceneEl.emit('playerHit', {damage: this.data.hitDamage, enemyId: this.el.id});
+                return;
             }
 
             // Move monster towards player
