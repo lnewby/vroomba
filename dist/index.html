@@ -368,7 +368,7 @@
                             //     state.currentLevel += 1;
                             //     AFRAME.scenes[0].emit('nextLevel');
                             // }
-                            if (state.enemiesAlive <= 0) {
+                            if (state.enemiesAlive <= 0 && state.playerHealth > 0) {
                                 state.currentLevel += 1;
                                 AFRAME.scenes[0].emit('nextLevel');
                             }
@@ -818,6 +818,7 @@
                 <a-image id="wave3" src="models/w3.png"></a-image>
                 <a-image id="wave4" src="models/w4.png"></a-image>
                 <a-image id="wave5" src="models/w5.png"></a-image>
+                <a-image id="gameover" src="models/gameover.png"></a-image>
 
                 <a-sound id="s-theme" src="sounds/Ambient_sounds/1-ALIEN Main Title (film version).mp3" preload="auto"></a-sound>
                 <a-sound id="s-hit" src="sounds/Enemy_sounds/Peter Griffin laugh.mp3" preload="auto"></a-sound>
@@ -898,7 +899,7 @@
                 <!-- Game End -->
                 <a-entity id="shoottoreset" position="0 10 -1.6" >
                     <a-entity id="reset-game" class="collidable"  gltf-model="#zombieBunny" scale="0.005 0.005 0.005"  play-all-model-animations></a-entity>
-                    <a-image src="#shootme7" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
+                    <a-image src="#gameover" height="0.4" width="5.2" scale="0.3" position="0 1.1 0.374"></a-image>
                 </a-entity>
 
                 <!-- particle effects -->
