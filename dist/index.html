@@ -890,17 +890,17 @@
                     <a-image src="#screen" height="2.3" width="2.3"></a-image>
 
                     <!-- Stat: health, level, enemies alive -->
-                    <a-text id="stat-health" bind__value="value: playerHealth" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
-                    <a-text id="stat-level" bind__value="value: currentLevel" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
-                    <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
-                    <a-text id="stat-enemydefeated" bind__value="value: totalEnemiesDefeated" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
+                    <a-text id="stat-health" bind__value="value: playerHealth" font="lib/Roboto-msdf.json" width="2.3" color="#33ffcc" align="center" opacity="0.6" transparent="true" position="0.380 0.115 0"></a-text>
+                    <a-text id="stat-level" bind__value="value: currentLevel" font="lib/Roboto-msdf.json" width="1.5" color="#33ffcc" align="center" opacity="0.8" transparent="true" position="0 0.965 0"></a-text>
+                    <a-text id="stat-enemyalive" bind__value="value: enemiesAlive" font="lib/Roboto-msdf.json" width="1.5" color="red" align="center" opacity="0.8" transparent="true" position="0.943 0.123 0"></a-text>
+                    <a-text id="stat-enemydefeated" bind__value="value: totalEnemiesDefeated" font="lib/Roboto-msdf.json" width="1.5" color="#00fdff" align="center" opacity="0.8" transparent="true" position="0.895 -0.527 0"></a-text>
 
                     <!-- Stat: weapon cooldown -->
-                    <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
-                    <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
+                    <a-text id="stat-cool-pull" bind__value="value: pullWeaponCooldownText" font="lib/Roboto-msdf.json" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.745 0"></a-text>
+                    <a-text id="stat-cool-push" bind__value="value: pushWeaponCooldownText" font="lib/Roboto-msdf.json" width="1.5" color="#00fdff" opacity="0.8" transparent="true" position="0.5 -0.845 0"></a-text>
 
                     <a-plane width="1" height="0.5" material="color: #ccffff; opacity: 0.2; transparent: true" position="-0.8 0.682 0.0001">
-                        <a-text id="stat-msg" bind__value="value: message" color="#33ffcc" position="-0.433 0.13 0" width="0.9" wrap-count="20" color="#faffef"></a-text>
+                        <a-text id="stat-msg" bind__value="value: message" font="lib/Roboto-msdf.json" color="#33ffcc" position="-0.433 0.13 0" width="0.9" wrap-count="20" color="#faffef"></a-text>
                     </a-plane>
 
                 </a-entity>
