@@ -180,7 +180,7 @@
         },
 
         tick: function () {
-            if (this.timer == this.data.spawnRate) {
+            if (this.timer >= this.data.spawnRate) {
                 this.spawn(this.data.monster);
                 this.timer = 0;
             }
