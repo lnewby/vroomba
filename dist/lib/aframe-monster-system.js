@@ -133,7 +133,7 @@
             gameStarted: {type: 'boolean', default: false},
             spawnRadius: {type: 'number', default: 1},
             spawnPoolSize: {type: 'number', default: 5},
-            spawnRate: {type: 'number', default: 200},
+            spawnRate: {type: 'number', default: 300},
 
             monster: {type: 'selector', default: '#monster'},
             monsterType: {type: 'string'}
@@ -143,7 +143,6 @@
             this.timer = 0;
             this.monsterCounter = 0;
             this.spawnPosition = this.el.object3D.position;
-            this.level = 0;
             this.registerSpawningZone();
             console.log(this.spawnPosition);
         },
@@ -158,7 +157,6 @@
         },
 
         nextLevel: function(poolSize){
-            this.level++;
             this.monsterCounter = 0;
             this.data.spawnPoolSize = poolSize;
         },
@@ -182,7 +180,7 @@
         },
 
         tick: function () {
-            if (this.timer == (this.data.spawnRate/this.level)) {
+            if (this.timer == this.data.spawnRate) {
                 this.spawn(this.data.monster);
                 this.timer = 0;
             }
