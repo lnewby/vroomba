@@ -211,7 +211,7 @@
                     enemiesDefeated: 0,
                     enemiesAlive: 0,
                     enemyIds: [],
-		            defeatedEnemyIds: [],
+		            //defeatedEnemyIds: [],
                     enemiesRayHitIds: [],
                     endLevel: 5,
                     weaponId: 0,
@@ -349,15 +349,12 @@
                         let deadSound = document.querySelector('#s-dead');
                         deadSound.components.sound.playSound();
 
-      //                   if (state.enemyIds.includes(enemyId)){
-      //                       state.enemyIds = state.enemyIds.filter(function(value, index, arr){
-      //                           let deadSound = document.querySelector("#s-dead");
-      //                           deadSound.components.sound.playSound();
-      //                           return value != enemyId;
-      //                       });
-						// }
+                        if (state.enemyIds.includes(enemyId)){
+                            state.enemyIds = state.enemyIds.filter(function(value, index, arr){
+                                return value != enemyId;
+                            });
+						}
 						// state.defeatedEnemyIds.push(enemyId);
-                        state.enemyIds.pop(enemyId);
                         state.enemiesAlive -= 1;
                         state.totalEnemiesDefeated += 1;
                         state.enemiesDefeated += 1;
@@ -651,12 +648,9 @@
                     let targetPosition = target.getAttribute('position');
                     for (let i = 0; i < monsterIds.length; i++){
                         var id = monsterIds[i];
-                        if (id == player.id){
-                            continue;
-                        }
                         var el = document.querySelector('#' + id); //monster
-                        var elPosition = el.getAttribute('position');
                         if (el != null) {
+                            var elPosition = el.getAttribute('position');
                             //distance from player to current iterated monster
                             let d = Math.sqrt(((playerPosition.x - elPosition.x)*(playerPosition.x - elPosition.x))
                                 + ((playerPosition.z - elPosition.z)*(playerPosition.z - elPosition.z)));
@@ -668,12 +662,12 @@
                                 //**Change targetPosition to to playerPosition in the next 2 lines to make
 								//the monsters move directly away from player instead of away from the monster who was hit
 								//**Change the (d*#) to any value to modify the distance that the monsters are pushed away
-                                let newX = targetPosition.x - (((d * 10) * (targetPosition.x - elPosition.x)) / d);
-                                let newZ = targetPosition.z - (((d * 10) * (targetPosition.z - elPosition.z)) / d);
+                                let newX = targetPosition.x - (((d * 2) * (targetPosition.x - elPosition.x)) / d);
+                                let newZ = targetPosition.z - (((d * 2) * (targetPosition.z - elPosition.z)) / d);
                                 //this part is to move the hit-monster directly away from the player
                                 if (d2target == 0){
-									newX = playerPosition.x - (((d * 10) * (playerPosition.x - elPosition.x)) / d);
-                                    newZ = playerPosition.z - (((d * 10) * (playerPosition.z - elPosition.z)) / d);
+									newX = playerPosition.x - (((d * 2) * (playerPosition.x - elPosition.x)) / d);
+                                    newZ = playerPosition.z - (((d * 2) * (playerPosition.z - elPosition.z)) / d);
                                 }
                                 var newPos = {
                                     x: newX,
@@ -857,7 +851,7 @@
 				</a-entity>
 
                 <!-- Camera image -->
-				<a-image backdrop src="" width="38.55" height="21.68" position="0 1 -8"></a-image>
+				<a-image backdrop src="" width="38.55" height="21.68" position="0 1 -10"></a-image>
 
                 <!-- Monitor -->
                 <!-- <a-entity obj-model="obj: #display-obj" material="src: #display-mat" scale="0.15 0.17 0.27" position="-1.276 0.211 -0.234" rotation="0 -45 0"></a-entity> -->
