@@ -612,14 +612,16 @@
 
                 moveMonstersToTarget: function( target, monsterIds ){
                     let targetPosition = target.getAttribute('position');
-                    var carrot = document.createElement('a-entity');
-                    carrot.setAttribute('carrot', '');
-                    carrot.setAttribute('geometry', 'primitive: sphere; radius: 0.4');
-                    carrot.setAttribute('material', 'color: orange');
-                    carrot.setAttribute('position', {x: 0, y: 0.5, z: 0});
+                    // var carrot = document.createElement('a-entity');
+                    // carrot.setAttribute('carrot', '');
+                    // carrot.setAttribute('geometry', 'primitive: sphere; radius: 0.4');
+                    // carrot.setAttribute('material', 'color: orange');
+                    // carrot.setAttribute('position', {x: 0, y: 0.5, z: 0});
+                    let bunny = target.querySelector('a-entity[gltf-model]');
+                    bunny.setAttribute('gltf-model', 'models/carrot/scene.gltf');
 
-                    console.log(targetPosition);
-                    target.appendChild(carrot);
+                    //console.log(targetPosition);
+                    //target.appendChild(carrot);
 
                     for (let i = 0; i < monsterIds.length; i++){
                         var id = monsterIds[i];
@@ -638,7 +640,8 @@
                     }
 
                     setTimeout( function() {
-                        target.removeChild(carrot);
+                        //target.removeChild(carrot);
+                        bunny.setAttribute('gltf-model', 'models/zombunny/scene.gltf');
                     }, 3000, target, carrot);
                 },
 
@@ -798,6 +801,7 @@
                 <a-asset-item id="bunny-obj" src="models/toybunny.obj"></a-asset-item>
                 <a-asset-item id="weapon-obj" src="models/railgun.obj"></a-asset-item>
                 <a-asset-item id="zombieBunny" src="models/zombunny/scene.gltf"></a-asset-item>
+                <a-asset-item id="carrot" src="models/carrot/scene.gltf"></a-asset-item>
 
                 <a-image id="TV1-mat" src="models/Tv1.jpg"></a-image>
                 <a-image id="bunny-mat" src="models/toybunny.jpg"></a-image>
@@ -921,12 +925,12 @@
                 <a-entity id="player" geometry="primitive: cylinder; radius: 0.2; height: 0.4" material="opacity: 0; transparent: true" position="0 0.2 0"></a-entity>
                 <a-entity spawner="monster: #monster1" id="spawner1" position="-3, 0.0001, -5"></a-entity>
                 <a-entity monster="monsterType: teal; health: 30; healthBarOffset: 1.5" id="monster1" position="0 0.6 -3" visible="false" sound="src: #s-hit; volume: 10">
-                    <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" class="collidable" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity spawner="monster: #monster2" id="spawner2" position="3, 0.0001, -5"></a-entity>
                 <a-entity monster="monsterType: red; health: 10; healthBarOffset: 1.5" id="monster2" position="0 0.45 -3" visible="false" sound="src: #s-hit; volume: 10">
-                    <a-entity class="collidable" gltf-model="#zombieBunny" scale="0.01 0.01 0.01" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
+                    <a-entity gltf-model="#zombieBunny" scale="0.01 0.01 0.01" class="collidable" animation__opacity="property: material.opacity; dir: alternate; dur: 1000; loop: true; from: 1; to: 0" material play-all-model-animations></a-entity>
                 </a-entity>
 
                 <a-entity monsters></a-entity>
