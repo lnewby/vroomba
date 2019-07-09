@@ -418,7 +418,7 @@
                         else if (state.weaponId > weaponType.length-1) { state.weaponId = 0; }
 
                         console.log(`Changed weapon to: ${weaponType[state.weaponId]}`);
-                        state.message = `Weapon change to: ${weaponType[state.weaponId]}`;
+                        state.message = `Weapon change to ${weaponType[state.weaponId]}`;
                         AFRAME.scenes[0].systems.weapon.weaponChanged(weaponType[state.weaponId]);
                     },
                     addEnemiesRayHit: function(state, action){
