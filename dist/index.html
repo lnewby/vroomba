@@ -407,7 +407,7 @@
                         }
                     },
                     weaponChanged: function(state, action){
-                        let weaponType = ['pull', 'push', 'splash', 'snipe', 'normal'];
+                        let weaponType = ['pull', 'push', 'splash', 'snipe'];
                         let reloadSound = document.querySelector("#s-reload");
                         reloadSound.components.sound.playSound();
                         
@@ -418,6 +418,7 @@
                         else if (state.weaponId > weaponType.length-1) { state.weaponId = 0; }
 
                         console.log(`Changed weapon to: ${weaponType[state.weaponId]}`);
+                        state.message = `Weapon change to: ${weaponType[state.weaponId]}`;
                         AFRAME.scenes[0].systems.weapon.weaponChanged(weaponType[state.weaponId]);
                     },
                     addEnemiesRayHit: function(state, action){
@@ -453,8 +454,6 @@
                             sceneEl.emit('playerHit', {damage: 5});
                         } else if (e.key == 4) {
                             sceneEl.emit('weaponChanged', {direction: 1});
-                        } else if (e.key == 5) {
-                            sceneEl.emit('weaponChanged', {direction: -1});
                         } else if (e.key == 9) {
                             sceneEl.emit('updateMessage', {message: "TEST"});
                         }
@@ -468,7 +467,7 @@
 
                 init: function () {
                     this.timer = 0;
-                    this.currentWeaponEffect = "normal";
+                    this.currentWeaponEffect = "snipe";
                     //this.shouldCheckCooldowns = false;
                     this.weaponInfo = {
                         push: {
@@ -501,14 +500,6 @@
                             damage: 10,
                             countdown: 0,
                             skinId: "#weapon-gold-mat"
-                            // secondsTimer: 0
-                        },
-                        normal: {
-                            effect: "normal",
-                            cooldown: 0,
-                            damage: 8,
-                            countdown: 0,
-                            skinId: "#weapon-green-mat"
                             // secondsTimer: 0
                         }
                     };
