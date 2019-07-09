@@ -750,10 +750,6 @@
                         sceneEl.emit('weaponChanged', {direction: 1});
                     });
 
-                    this.el.addEventListener('trackpadup', () => {
-                        sceneEl.emit('weaponChanged', {direction: -1});
-                    });
-
                     this.weapon = document.querySelector('#weapon-model');
                 },
 
